@@ -111,13 +111,17 @@ ZiTEST( Test_PrioritizedTaskManager2 )
 
     for ( int i = 1; i < 101; ++i )
     {
-        tm.insert< zi::priority::lowest       >( zi::run_fn( zi::bind( &inc_by_and_insert , 6 ) ) );
-        tm.insert< zi::priority::low          >( zi::run_fn( zi::bind( &inc_by_and_insert , 5 ) ) );
-        tm.insert< zi::priority::custom< -5 > >( zi::run_fn( zi::bind( &inc_by_and_insert , 4 ) ) );
         tm.insert< zi::priority::normal       >( zi::run_fn( zi::bind( &inc_by_and_insert , 3 ) ) );
         tm.insert< zi::priority::custom<  5 > >( zi::run_fn( zi::bind( &inc_by_and_insert , 2 ) ) );
         tm.insert< zi::priority::high         >( zi::run_fn( zi::bind( &inc_by_and_insert , 1 ) ) );
         tm.insert< zi::priority::highest      >( zi::run_fn( zi::bind( &inc_by_and_insert , 0 ) ) );
+    }
+
+    for ( int i = 1; i < 101; ++i )
+    {
+        tm.insert< zi::priority::lowest       >( zi::run_fn( zi::bind( &inc_by_and_insert , 6 ) ) );
+        tm.insert< zi::priority::low          >( zi::run_fn( zi::bind( &inc_by_and_insert , 5 ) ) );
+        tm.insert< zi::priority::custom< -5 > >( zi::run_fn( zi::bind( &inc_by_and_insert , 4 ) ) );
     }
 
     tm.start();
