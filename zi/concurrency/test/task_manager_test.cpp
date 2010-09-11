@@ -53,7 +53,7 @@ ZiTEST( Test_SimpleTaskManager )
 
     for ( int i = 1; i < 1001; ++i )
     {
-        tm.insert( zi::run_fn( zi::bind( &inc_by , i ) ) );
+        tm.insert( zi::run_fn( zi::bind( &inc_by, i ) ) );
     }
 
     tm.join();
