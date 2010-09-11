@@ -67,7 +67,6 @@ public:
 };
 
 } // namespace concurrency_
-
 } // namespace zi
 
 #endif

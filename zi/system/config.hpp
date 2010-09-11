@@ -19,7 +19,10 @@
 #    include <windows.h>
 #  endif
 #  include <winsock.h>
+#  include <psapi.h>
 #  pragma comment(lib, "Ws2_32.lib")
+#  pragma comment(lib, "Kernel32.lib")
+#  pragma comment(lib, "Psapi.lib")
 #
 #elif defined( ZI_OS_MACOS )
 #  include <sys/types.h>
@@ -29,6 +32,8 @@
 #  include <mach/shared_memory_server.h>
 #
 #elif defined( ZI_OS_LINUX )
+#  include <sys/sysinfo.h>
+#  include <cstdio>
 #
 #else
 #  error "detected os is not supported"

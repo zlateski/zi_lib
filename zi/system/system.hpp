@@ -10,6 +10,7 @@
 
 #include <zi/system/detail/cpu_count.hpp>
 #include <zi/system/detail/memory_size.hpp>
+#include <zi/system/detail/memory_usage.hpp>
 #include <zi/system/detail/get_username.hpp>
 #include <zi/system/detail/get_hostname.hpp>
 
@@ -78,23 +79,46 @@ struct memory {
         return memory_gb;
     }
 
+    static inline int64_t usage( bool virt = false )
+    {
+        return detail::memory_usage( virt );
+    }
+
+    static inline int64_t usage_kb( bool virt = false )
+    {
+        int64_t m = usage( virt );
+        return ( m >> 10 ) + ( m % 1024 > 512 ? 1 : 0 );
+    }
+
+    static inline int64_t usage_mb( bool virt = false )
+    {
+        int64_t m = usage_kb( virt );
+        return ( m >> 10 ) + ( m % 1024 > 512 ? 1 : 0 );
+    }
+
+    static inline int64_t usage_gb( bool virt = false )
+    {
+        int64_t m = usage_mb( virt );
+        return ( m >> 10 ) + ( m % 1024 > 512 ? 1 : 0 );
+    }
+
     template< class T >
     static inline T available
-    (typename enable_if< is_integral< T >::value >::type* = 0 )
+    ( typename enable_if< is_integral< T >::value >::type* = 0 )
     {
         return available();
     }
 
     template< class T >
     static inline T available
-    (typename enable_if< is_floating_point< T >::value >::type* = 0 )
+    ( typename enable_if< is_floating_point< T >::value >::type* = 0 )
     {
         return static_cast< T >( available() );
     }
 
     template< class T >
     static inline T available_kb
-    (typename enable_if< is_integral< T >::value >::type* = 0 )
+    ( typename enable_if< is_integral< T >::value >::type* = 0 )
     {
         int64_t m = available();
         return ( m >> 10 ) + ( m % 1024 > 512 ? 1 : 0 );
@@ -102,14 +126,14 @@ struct memory {
 
     template< class T >
     static inline T available_kb
-    (typename enable_if< is_floating_point< T >::value >::type* = 0 )
+    ( typename enable_if< is_floating_point< T >::value >::type* = 0 )
     {
         return static_cast< T >( available() ) / 1024.0;
     }
 
     template< class T >
     static inline T available_mb
-    (typename enable_if< is_integral< T >::value >::type* = 0 )
+    ( typename enable_if< is_integral< T >::value >::type* = 0 )
     {
         int64_t m = available_kb();
         return ( m >> 10 ) + ( m % 1024 > 512 ? 1 : 0 );
@@ -117,14 +141,14 @@ struct memory {
 
     template< class T >
     static inline T available_mb
-    (typename enable_if< is_floating_point< T >::value >::type* = 0 )
+    ( typename enable_if< is_floating_point< T >::value >::type* = 0 )
     {
         return static_cast< T >( available() ) / 1024.0 / 1024.0;
     }
 
     template< class T >
     static inline T available_gb
-    (typename enable_if< is_integral< T >::value >::type* = 0 )
+    ( typename enable_if< is_integral< T >::value >::type* = 0 )
     {
         int64_t m = available_mb();
         return ( m >> 10 ) + ( m % 1024 > 512 ? 1 : 0 );
@@ -132,65 +156,124 @@ struct memory {
 
     template< class T >
     static inline T available_gb
-    (typename enable_if< is_floating_point< T >::value >::type* = 0 )
+    ( typename enable_if< is_floating_point< T >::value >::type* = 0 )
     {
         return static_cast< T >( available() ) / 1024.0 / 1024.0 / 1024.0;
     }
 
     template< class T >
     static inline T total
-    (typename enable_if< is_integral< T >::value >::type* = 0 )
+    ( typename enable_if< is_integral< T >::value >::type* = 0 )
     {
         return memory_size;
     }
 
     template< class T >
     static inline T total
-    (typename enable_if< is_floating_point< T >::value >::type* = 0 )
+    ( typename enable_if< is_floating_point< T >::value >::type* = 0 )
     {
         return static_cast< T >( memory_size );
     }
 
     template< class T >
     static inline T total_kb
-    (typename enable_if< is_integral< T >::value >::type* = 0 )
+    ( typename enable_if< is_integral< T >::value >::type* = 0 )
     {
         return memory_kb;
     }
 
     template< class T >
     static inline T total_kb
-    (typename enable_if< is_floating_point< T >::value >::type* = 0 )
+    ( typename enable_if< is_floating_point< T >::value >::type* = 0 )
     {
         return static_cast< T >( memory_size ) / 1024.0;
     }
 
     template< class T >
     static inline T total_mb
-    (typename enable_if< is_integral< T >::value >::type* = 0 )
+    ( typename enable_if< is_integral< T >::value >::type* = 0 )
     {
         return memory_mb;
     }
 
     template< class T >
     static inline T total_mb
-    (typename enable_if< is_floating_point< T >::value >::type* = 0 )
+    ( typename enable_if< is_floating_point< T >::value >::type* = 0 )
     {
         return static_cast< T >( memory_size ) / 1024.0 / 1024.0;
     }
 
     template< class T >
     static inline T total_gb
-    (typename enable_if< is_integral< T >::value >::type* = 0 )
+    ( typename enable_if< is_integral< T >::value >::type* = 0 )
     {
         return memory_gb;
     }
 
     template< class T >
     static inline T total_gb
-    (typename enable_if< is_floating_point< T >::value >::type* = 0 )
+    ( typename enable_if< is_floating_point< T >::value >::type* = 0 )
     {
         return static_cast< T >( memory_size ) / 1024.0 / 1024.0 / 1024.0;
+    }
+
+    template< class T >
+    static inline T usage
+    ( bool virt = false, typename enable_if< is_integral< T >::value >::type* = 0 )
+    {
+        return usage( virt );
+    }
+
+    template< class T >
+    static inline T usage
+    ( bool virt = false, typename enable_if< is_floating_point< T >::value >::type* = 0 )
+    {
+        return static_cast< T >( usage( virt ) );
+    }
+
+    template< class T >
+    static inline T usage_kb
+    ( bool virt = false, typename enable_if< is_integral< T >::value >::type* = 0 )
+    {
+        int64_t m = usage( virt );
+        return ( m >> 10 ) + ( m % 1024 > 512 ? 1 : 0 );
+    }
+
+    template< class T >
+    static inline T usage_kb
+    ( bool virt = false, typename enable_if< is_floating_point< T >::value >::type* = 0 )
+    {
+        return static_cast< T >( usage( virt ) ) / 1024.0;
+    }
+
+    template< class T >
+    static inline T usage_mb
+    ( bool virt = false, typename enable_if< is_integral< T >::value >::type* = 0 )
+    {
+        int64_t m = usage_kb( virt );
+        return ( m >> 10 ) + ( m % 1024 > 512 ? 1 : 0 );
+    }
+
+    template< class T >
+    static inline T usage_mb
+    ( bool virt = false, typename enable_if< is_floating_point< T >::value >::type* = 0 )
+    {
+        return static_cast< T >( usage( virt ) ) / 1024.0 / 1024.0;
+    }
+
+    template< class T >
+    static inline T usage_gb
+    ( bool virt = false, typename enable_if< is_integral< T >::value >::type* = 0 )
+    {
+        int64_t m = usage_mb( virt );
+        return ( m >> 10 ) + ( m % 1024 > 512 ? 1 : 0 );
+    }
+
+    template< class T >
+    static inline T usage_gb
+    ( bool virt = false, typename enable_if< is_floating_point< T >::value >::type* = 0 )
+    {
+        return static_cast< T >( usage( virt ) ) / 1024.0 / 1024.0 / 1024.0;
     }
 
 };

@@ -19,8 +19,8 @@
             namespace {                                                 \
                 struct test_ ## _tname ## _tag;                         \
             }                                                           \
-        }                                                               \
-    }                                                                   \
+        } /* namespace zunit */                                         \
+    } /* namespace zi */                                                \
                                                                         \
     template< class FileTag >                                           \
     struct ___test ## _tname: ::zi::zunit::test_case                    \

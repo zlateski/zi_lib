@@ -35,7 +35,7 @@ private:
 
 public:
 
-    registry(): suites_() {} /// add_suite<suite_tag<void>::type >(); }
+    registry(): suites_() {}
 
     void add_suite( test_suite& suite )
     {

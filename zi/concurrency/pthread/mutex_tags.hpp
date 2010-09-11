@@ -15,9 +15,7 @@ namespace concurrency_ {
 
 
 struct mutex_default_tag;
-
 struct mutex_adaptive_tag;
-
 struct mutex_recursive_tag;
 
 

@@ -6,6 +6,9 @@
  */
 
 #include <iostream>
+#include <vector>
+#include <cstdlib>
+
 #include <zi/system/system.hpp>
 
 int main()
@@ -37,6 +40,43 @@ int main()
     std::cout << "Avail KB    : " << zi::system::memory::available_kb<float>() << "\n";
     std::cout << "Avail MB    : " << zi::system::memory::available_mb<float>() << "\n";
     std::cout << "Avail GB    : " << zi::system::memory::available_gb<float>() << "\n\n";
+
+    std::cout << "Usage Memory: " << zi::system::memory::usage() << "\n";
+    std::cout << "Usage KB    : " << zi::system::memory::usage_kb() << "\n";
+    std::cout << "Usage MB    : " << zi::system::memory::usage_mb() << "\n";
+    std::cout << "Usage GB    : " << zi::system::memory::usage_gb() << "\n\n";
+
+    std::cout << "Usage Memory: " << zi::system::memory::usage<float>() << "\n";
+    std::cout << "Usage KB    : " << zi::system::memory::usage_kb<float>() << "\n";
+    std::cout << "Usage MB    : " << zi::system::memory::usage_mb<float>() << "\n";
+    std::cout << "Usage GB    : " << zi::system::memory::usage_gb<float>() << "\n\n";
+
+    std::cout << "Virt  Memory: " << zi::system::memory::usage( true ) << "\n";
+    std::cout << "Virt  KB    : " << zi::system::memory::usage_kb( true ) << "\n";
+    std::cout << "Virt  MB    : " << zi::system::memory::usage_mb( true ) << "\n";
+    std::cout << "Virt  GB    : " << zi::system::memory::usage_gb( true ) << "\n\n";
+
+    std::cout << "Virt  Memory: " << zi::system::memory::usage<float>( true ) << "\n";
+    std::cout << "Virt  KB    : " << zi::system::memory::usage_kb<float>( true ) << "\n";
+    std::cout << "Virt  MB    : " << zi::system::memory::usage_mb<float>( true ) << "\n";
+    std::cout << "Virt  GB    : " << zi::system::memory::usage_gb<float>( true ) << "\n\n";
+
+    {
+
+        std::vector< int > v( 10000000 );
+
+        std::cout << "Virt  Memory: " << zi::system::memory::usage<float>( true ) << "\n";
+        std::cout << "Virt  KB    : " << zi::system::memory::usage_kb<float>( true ) << "\n";
+        std::cout << "Virt  MB    : " << zi::system::memory::usage_mb<float>( true ) << "\n";
+        std::cout << "Virt  GB    : " << zi::system::memory::usage_gb<float>( true ) << "\n\n";
+
+    }
+
+    std::cout << "Virt  Memory: " << zi::system::memory::usage<float>( true ) << "\n";
+    std::cout << "Virt  KB    : " << zi::system::memory::usage_kb<float>( true ) << "\n";
+    std::cout << "Virt  MB    : " << zi::system::memory::usage_mb<float>( true ) << "\n";
+    std::cout << "Virt  GB    : " << zi::system::memory::usage_gb<float>( true ) << "\n\n";
+
 
     std::cout << "Username    : " << zi::system::username << "\n";
     std::cout << "Username    : " << zi::system::get_username() << "\n";
