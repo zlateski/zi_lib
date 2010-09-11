@@ -84,6 +84,7 @@ public:
                           << "      -key   (is equivalent to --key=true)\n"
                           << "      -nokey (is equivalent to --key=false)\n\n\n";
 
+                exit( 0 );
                 return false;
             }
         }
@@ -125,10 +126,18 @@ public:
         return true;
     }
 
+
+    static std::string filename()
+    {
+        return arguments::instance().file_name_;
+    }
+
 };
 
 
 } // namespace zargs_
+
+using zargs_::arguments;
 
 inline bool parse_arguments( int &argc, char **argv, bool remove_args = true )
 {
