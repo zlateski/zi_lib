@@ -11,6 +11,11 @@
 #include <zi/config/config.hpp>
 
 #if defined( ZI_OS_WINDOWS )
+#  // look at concurrency/config.hpp
+#  // for why we need NOMINMAX ( can't use numerical_limits< ... > )
+#  ifndef NOMINMAX
+#    define NOMINMAX 1
+#  endif
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #    include <windows.h>
@@ -18,6 +23,7 @@
 #  else
 #    include <windows.h>
 #  endif
+#  undef NOMINMAX
 #
 #endif
 

@@ -21,18 +21,15 @@
 
 
 namespace zi {
-
 namespace concurrency_ {
 
 
 class condition_variable: non_copyable
 {
 private:
-
     mutable pthread_cond_t cv_;
 
 public:
-
     condition_variable()
     {
         ZI_VERIFY_0( pthread_cond_init( &cv_, NULL ) );
@@ -117,9 +114,7 @@ public:
 };
 
 
-
 } // namespace concurrency_
-
 } // namespace zi
 
 

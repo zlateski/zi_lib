@@ -12,7 +12,6 @@
 #include <zi/concurrency/mutex.hpp>
 #include <zi/concurrency/spinlock.hpp>
 #include <zi/concurrency/rwmutex.hpp>
-#include <zi/concurrency/condition_variable.hpp>
 #include <zi/concurrency/detail/is_mutex.hpp>
 
 #include <zi/utility/non_copyable.hpp>
@@ -20,6 +19,9 @@
 
 namespace zi {
 namespace concurrency_ {
+
+// forward declaration
+class condition_variable;
 
 struct guard_container_wrapper
 {
@@ -44,6 +46,8 @@ public:
         m_.unlock();
     }
 
+    friend class condition_variable;
+
 };
 
 class guard: non_copyable
@@ -63,6 +67,8 @@ public:
     {
         delete gcw_;
     }
+
+    friend class condition_variable;
 };
 
 } // namespace concurrency_
