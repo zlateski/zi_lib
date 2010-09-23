@@ -16,43 +16,33 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ZI_CONCURRENCY_PTHREAD_MUTEX_TYPES_HPP
-#define ZI_CONCURRENCY_PTHREAD_MUTEX_TYPES_HPP 1
+#ifndef ZI_SYSTEM_ERROR_HPP
+#define ZI_SYSTEM_ERROR_HPP 1
 
-#include <zi/concurrency/pthread/mutex_tpl.hpp>
+#include <zi/system/detail/cerrno_code.hpp>
+#include <zi/system/detail/win32_errno_code.hpp>
+#include <zi/system/detail/linux_errno_code.hpp>
+
+#include <stdexcept>
+#include <string>
 
 namespace zi {
-namespace concurrency_ {
+namespace system {
 
-typedef mutex_tpl< mutex_default_tag >   mutex_default;
-typedef mutex_tpl< mutex_adaptive_tag >  mutex_adaptive;
-typedef mutex_tpl< mutex_recursive_tag > mutex_recursive;
-
-template< class Mutex >
-struct is_native_mutex_type
+class error: public std::runtime_error
 {
-    static const bool value = false;
+private:
+    cerrno_type           error_code_;
+    mutable std::string   message_   ;
+
+public:
+    error(
+
 };
 
-template<>
-struct is_native_mutex_type< mutex_default >
-{
-    static const bool value = true;
-};
-
-template<>
-struct is_native_mutex_type< mutex_adaptive >
-{
-    static const bool value = true;
-};
-
-template<>
-struct is_native_mutex_type< mutex_recursive >
-{
-    static const bool value = true;
-};
-
-} // namespace concurrency_
+} // namespace system
 } // namespace zi
+
+#endif // defined( ZI_OS_WINDOWS )
 
 #endif

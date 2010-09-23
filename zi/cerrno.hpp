@@ -16,15 +16,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#if defined( ZI_OS_MACOS )
-#
-#define  ZI_HAS_POSIX_SUPPORT
-#include <zi/config/posix.hpp>
-#
-#define ZI_HAS_GETTIMEOFDAY
-#
-#if ( __GNUC__ >= 4 )
-#  define ZI_HAS_NANOSLEEP
-#endif
-#
+#ifndef ZI_CERRNO_HPP
+#define ZI_CERRNO_HPP 1
+
+#include <zi/bits/cerrno.hpp>
+
 #endif

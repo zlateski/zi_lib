@@ -31,8 +31,9 @@
 namespace zi {
 namespace concurrency_ {
 
-// forward declaration
+// forward declarations
 class condition_variable;
+class event;
 
 struct guard_container_wrapper
 {
@@ -58,6 +59,7 @@ public:
     }
 
     friend class condition_variable;
+    friend class event;
 
 };
 
@@ -80,6 +82,7 @@ public:
     }
 
     friend class condition_variable;
+    friend class event;
 };
 
 } // namespace concurrency_

@@ -29,7 +29,7 @@ CXX	=	$(AT)i586-mingw32msvc-g++
 FPIC	=
 
 INCLUDES	=	-I$(HERE) -I$(HERE)/../.. \
-			-I$(HERE)/../../../external/include
+			-I$(HERE)/../../external/include
 
 CXX_INCLUDES	=	$(INCLUDES)
 

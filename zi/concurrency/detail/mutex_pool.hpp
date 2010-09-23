@@ -25,9 +25,10 @@
 #include <cstddef>
 
 namespace zi {
-
 namespace concurrency_ {
 
+// forward
+class condition_variable;
 
 template< class Tag, class Mutex, std::size_t Size = 83 > // 83 is prime!
 class mutex_pool: non_copyable
@@ -47,6 +48,12 @@ public:
     {
     public:
 
+        explicit guard( std::size_t ind ):
+            m_( pool_[ ind % pool_size ] )
+        {
+            m_.lock();
+        }
+
         explicit guard( void const * ptr ):
             m_( pool_[ reinterpret_cast< std::size_t >( ptr ) % pool_size ] )
         {
@@ -57,6 +64,8 @@ public:
         {
             m_.unlock();
         }
+
+        friend class condition_variable;
 
     private:
 

@@ -16,15 +16,33 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#if defined( ZI_OS_MACOS )
-#
-#define  ZI_HAS_POSIX_SUPPORT
-#include <zi/config/posix.hpp>
-#
-#define ZI_HAS_GETTIMEOFDAY
-#
-#if ( __GNUC__ >= 4 )
-#  define ZI_HAS_NANOSLEEP
+#ifndef ZI_ATOMIC_DETAIL_COMPILER_FENCE_HPP
+#define ZI_ATOMIC_DETAIL_COMPILER_FENCE_HPP 1
+
+#include <zi/atomic/config.hpp>
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#  pragma once
 #endif
 #
+#if defined( _MSC_VER ) && _MSC_VER >= 1310
+#
+
+extern "C" void _ReadWriteBarrier();
+
+#
+#pragma intrinsic( _ReadWriteBarrier )
+#
+#define ZI_CONCURRENCY_COMPILER_FENCE _ReadWriteBarrier();
+#
+#elif defined(__GNUC__)
+#
+#define ZI_CONCURRENCY_COMPILER_FENCE __asm__ __volatile__( "" : : : "memory" );
+#
+#else
+#
+#define ZI_CONCURRENCY_COMPILER_FENCE
+#
+#endif
+
 #endif

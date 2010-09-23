@@ -134,20 +134,6 @@ public:
         return wait_( g.m_, static_cast< win32::dword >( ttl.msecs() ) );
     }
 
-    template< class MutexTag >
-    bool timed_wait_usec( const mutex_tpl< MutexTag > &mutex, int64_t ttl ) const
-    {
-        return wait_( mutex, static_cast< win32::dword >
-                      ( ttl / 1000 + ( ( ttl % 1000 > 500 ) ? 1 : 0 ) ) );
-    }
-
-    template< class Mutex >
-    bool timed_wait_usec( const mutex_guard< Mutex > &g, int64_t ttl ) const
-    {
-        return wait_( g.m_, static_cast< win32::dword >
-                      ( ttl / 1000 + ( ( ttl % 1000 > 500 ) ? 1 : 0 ) ) );
-    }
-
     void notify_one() const
     {
         if ( waiters_ > 0 )
@@ -179,6 +165,5 @@ public:
 
 } // namespace concurrency_
 } // namespace zi
-
 
 #endif

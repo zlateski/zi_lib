@@ -82,6 +82,18 @@ inline void interlocked_write_release( void** x, void* value )
 
 #endif
 
+using ::zi::atomic::atomic_word;
+using ::zi::atomic::compare_swap;
+using ::zi::atomic::add_swap;
+using ::zi::atomic::increment;
+using ::zi::atomic::decrement;
+using ::zi::atomic::increment_swap;
+using ::zi::atomic::decrement_swap;
+using ::zi::atomic::write;
+using ::zi::atomic::read;
+using ::zi::atomic::test_increment_swap;
+
+
 #endif // 0
 
 using ::InterlockedIncrement;
@@ -89,7 +101,6 @@ using ::InterlockedDecrement;
 using ::InterlockedCompareExchange;
 using ::InterlockedExchange;
 using ::InterlockedExchangeAdd;
-
 
 } // namespace win32
 } // namespace concurrency_

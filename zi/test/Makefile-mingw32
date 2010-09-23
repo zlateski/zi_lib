@@ -18,3 +18,7 @@ all: $(BINDIR)/unit_tests.exe
 runtests: all
 	$(ECHO) "[RUN] running   $(BINDIR)/unit_tests.exe"
 	$(BINDIR)/unit_tests.exe
+
+ALLDEPS = $(shell find ../  | grep -Z --color=never "_test\.cpp$$" | replace ".cpp" ".d" -- | replace "../" "./bin/" -- )
+
+-include $(ALLDEPS)

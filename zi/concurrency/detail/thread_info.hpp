@@ -258,7 +258,7 @@ public:
 #endif
 
             state_ = SLEEPING;
-            bool awaken = sleep_cv_.timed_wait_usec( mutex_, usec );
+            bool awaken = sleep_cv_.timed_wait( mutex_, interval::usecs( usec ) );
             if ( state_ == SLEEPING )
             {
                 state_ = RUNNING;

@@ -50,6 +50,10 @@ using ::GetCurrentThreadId;
 using ::GetCurrentThread;
 using ::SignalObjectAndWait;
 using ::ResumeThread;
+using ::SetEvent;
+using ::ResetEvent;
+
+using ::Sleep;
 
 const unsigned forever = INFINITE;
 

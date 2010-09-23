@@ -27,6 +27,7 @@ namespace concurrency_ {
 
 // forward declaration
 class condition_variable;
+class event;
 
 template< class Mutex > class mutex_guard: non_copyable
 {
@@ -34,6 +35,7 @@ private:
 
     const Mutex &m_;
     friend class condition_variable;
+    friend class event;
 
 public:
 

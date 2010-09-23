@@ -34,7 +34,7 @@ namespace concurrency_ {
 // forward decls
 struct thread;
 
-struct runnable
+struct runnable: private non_copyable
 {
 private:
     struct mutex_pool_tag;

@@ -153,7 +153,6 @@ public:
 };
 
 
-
 } // namespace concurrency_
 
 using concurrency_::semaphore;

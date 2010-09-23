@@ -20,9 +20,12 @@
 #define ZI_CONCURRENCY_PTHREAD_CONDITION_VARIABLE_HPP 1
 
 #include <zi/concurrency/config.hpp>
+#include <zi/concurrency/detail/is_mutex.hpp>
+#include <zi/concurrency/pthread/spinlock.hpp>
 #include <zi/concurrency/pthread/mutex_types.hpp>
 
 #include <zi/utility/non_copyable.hpp>
+#include <zi/utility/enable_if.hpp>
 #include <zi/utility/assert.hpp>
 
 #include <zi/time/now.hpp>
@@ -38,6 +41,7 @@ namespace concurrency_ {
 class condition_variable: non_copyable
 {
 private:
+    struct  cv_tag;
     mutable pthread_cond_t cv_;
 
 public:
@@ -94,22 +98,6 @@ public:
     {
         timespec ts;
         time_utils::nsec_to_ts( ts, now::nsec() + ttl.nsecs() );
-        return pthread_cond_timedwait( &cv_, &g.m_.mutex_, &ts ) == 0;
-    }
-
-    template< class MutexTag >
-    bool timed_wait_usec( const mutex_tpl< MutexTag > &mutex, int64_t ttl ) const
-    {
-        timespec ts;
-        time_utils::usec_to_ts( ts, now::usec() + ttl );
-        return pthread_cond_timedwait( &cv_, &mutex.mutex_, &ts ) == 0;
-    }
-
-    template< class Mutex >
-    bool timed_wait_usec( const mutex_guard< Mutex > &g, int64_t ttl ) const
-    {
-        timespec ts;
-        time_utils::usec_to_ts( ts, now::usec() + ttl );
         return pthread_cond_timedwait( &cv_, &g.m_.mutex_, &ts ) == 0;
     }
 

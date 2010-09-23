@@ -16,43 +16,25 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ZI_CONCURRENCY_PTHREAD_MUTEX_TYPES_HPP
-#define ZI_CONCURRENCY_PTHREAD_MUTEX_TYPES_HPP 1
+#ifndef ZI_CONCURRENCY_EVENT_HPP
+#define ZI_CONCURRENCY_EVENT_HPP 1
 
-#include <zi/concurrency/pthread/mutex_tpl.hpp>
+#include <zi/concurrency/config.hpp>
+
+#if defined( ZI_HAS_PTHREADS )
+#  include <zi/concurrency/pthread/event.hpp>
+#
+#elif defined( ZI_HAS_WINTHREADS )
+#  include <zi/concurrency/win32/event.hpp>
+#
+#else
+#  error "add other"
+#endif
 
 namespace zi {
-namespace concurrency_ {
 
-typedef mutex_tpl< mutex_default_tag >   mutex_default;
-typedef mutex_tpl< mutex_adaptive_tag >  mutex_adaptive;
-typedef mutex_tpl< mutex_recursive_tag > mutex_recursive;
+typedef concurrency_::event event;
 
-template< class Mutex >
-struct is_native_mutex_type
-{
-    static const bool value = false;
-};
-
-template<>
-struct is_native_mutex_type< mutex_default >
-{
-    static const bool value = true;
-};
-
-template<>
-struct is_native_mutex_type< mutex_adaptive >
-{
-    static const bool value = true;
-};
-
-template<>
-struct is_native_mutex_type< mutex_recursive >
-{
-    static const bool value = true;
-};
-
-} // namespace concurrency_
 } // namespace zi
 
 #endif

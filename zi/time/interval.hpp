@@ -54,6 +54,11 @@ public:
     {
     }
 
+    operator bool() const
+    {
+        return static_cast< bool >( value_ );
+    }
+
     interval_tpl operator-() const
     {
         return interval_tpl( value_, 0 );

@@ -33,8 +33,9 @@
 namespace zi {
 namespace concurrency_ {
 
-// forward declaration
+// forward declarations
 class condition_variable;
+class event;
 
 template< class Mutex >
 class recursive_mutex_tpl: non_copyable
@@ -111,6 +112,7 @@ public:
     struct pool: mutex_pool< Tag, recursive_mutex_tpl< Mutex > > { };
 
     friend class condition_variable;
+    friend class event;
 
 };
 

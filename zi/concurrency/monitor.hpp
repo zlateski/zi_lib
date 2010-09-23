@@ -28,6 +28,8 @@
 #include <zi/utility/assert.hpp>
 #include <zi/time/now.hpp>
 
+#include <cstddef>
+
 namespace zi {
 namespace concurrency_ {
 
@@ -36,14 +38,16 @@ class monitor: non_copyable
 {
 private:
 
-    condition_variable cv_;
-    mutex              m_ ;
+    const mutex        &m_      ;
+    condition_variable  cv_     ;
+    mutable int         waiters_;
 
 public:
 
-    explicit monitor( int32_t count = 1 ): cv_(), m_()
+    class synchronized;
+
+    explicit monitor( const mutex &m ): m_( m ), cv_(), waiters_( 0 )
     {
-        ZI_VERIFY( count > 0 );
     }
 
 private:
@@ -60,12 +64,16 @@ private:
 
     void wait() const
     {
+        ++waiters_;
         cv_.wait( m_ );
+        --waiters_;
     }
 
     bool timed_wait(int64_t ttl) const
     {
+        ++waiters_;
         return cv_.timed_wait( m_, ttl );
+        --waiters_;
     }
 
     void notify_one() const
@@ -96,6 +104,11 @@ public:
         ~synchronized()
         {
             m_.unlock();
+
+            if ( m_.waiters_ > 0 )
+            {
+                m_.notify_one();
+            }
         }
 
         void wait() const

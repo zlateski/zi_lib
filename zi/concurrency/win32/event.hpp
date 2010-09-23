@@ -16,13 +16,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ZI_CONCURRENCY_WIN32_DEFAULT_MUTEX_HPP
-#define ZI_CONCURRENCY_WIN32_DEFAULT_MUTEX_HPP 1
+#ifndef ZI_CONCURRENCY_WIN32_EVENT_HPP
+#define ZI_CONCURRENCY_WIN32_EVENT_HPP 1
 
 #include <zi/concurrency/config.hpp>
-#include <zi/concurrency/detail/mutex_guard.hpp>
-#include <zi/concurrency/detail/mutex_pool.hpp>
+#include <zi/concurrency/win32/mutex_types.hpp>
 #include <zi/concurrency/win32/detail/primitives.hpp>
+#include <zi/concurrency/win32/detail/interlocked.hpp>
 
 #include <zi/utility/non_copyable.hpp>
 #include <zi/utility/assert.hpp>
@@ -30,50 +30,49 @@
 namespace zi {
 namespace concurrency_ {
 
-// forward declarations
-class condition_variable;
-class event;
 
-class default_mutex: non_copyable
+class event: non_copyable
 {
 private:
-    win32::handle handle_;
+    win32::handle         event_;
 
 public:
 
-    default_mutex():
-        handle_( win32::CreateMutex( NULL, false, NULL ) )
+    event(): event_( win32::CreateEvent( 0, true, false, 0 ) )
     {
-        ZI_VERIFY( handle_ != NULL );
+        ZI_VERIFY( event_ );
     }
 
-    ~default_mutex()
+    ~event()
     {
-        ZI_VERIFY( win32::CloseHandle( handle_ ) );
+        ZI_VERIFY( win32::CloseHandle( event_ ) );
     }
 
-    inline bool try_lock() const
+    template< class MutexTag >
+    void wait( const mutex_tpl< MutexTag > &mutex ) const
     {
-        return win32::WaitForSingleObject( handle_, 0 ) == 0;
+        mutex.unlock();
+        win32::WaitForSingleObject( event_, win32::forever );
+        mutex.lock();
     }
 
-    inline void lock() const
+    template< class Mutex >
+    void wait( const mutex_guard< Mutex > &g ) const
     {
-        ZI_VERIFY_0( win32::WaitForSingleObject( handle_, win32::forever ));
+        g.m_.unlock();
+        win32::WaitForSingleObject( event_, win32::forever );
+        g.m_.lock();
     }
 
-    inline void unlock() const
+    void signal() const
     {
-        ZI_VERIFY( win32::ReleaseMutex( handle_ ) );
+        win32::SetEvent( event_ );
     }
 
-    typedef mutex_guard< default_mutex > guard;
-
-    template< class Tag >
-    struct pool: mutex_pool< Tag, default_mutex > { };
-
-    friend class condition_variable;
-    friend class event;
+    void clear() const
+    {
+        win32::ResetEvent( event_ );
+    }
 
 };
 

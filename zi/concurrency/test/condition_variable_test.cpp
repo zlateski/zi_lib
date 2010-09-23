@@ -102,6 +102,62 @@ struct cv_tester2: zi::runnable
     zi::condition_variable cv_;
 };
 
+struct cv_tester3: zi::runnable
+{
+    cv_tester3():
+        ok_( true ), l_( false ), x_( 0 ), m_(), cv_()
+    {
+    }
+
+    void run()
+    {
+        zi::mutex::guard g( m_ );
+        while ( x_ < 1000 )
+        {
+            int  z =  x_;
+            bool l = !l_;
+
+            if ( !l_ )
+            {
+                l_ = true;
+            }
+
+            cv_.notify_all();
+            cv_.notify_one();
+            cv_.notify_all();
+
+            cv_.wait( g );
+
+            if ( l )
+            {
+                ok_ = z == x_;
+                ++x_;
+                l_ = false;
+            }
+
+
+            cv_.notify_all();
+            cv_.notify_one();
+            cv_.notify_all();
+
+        }
+
+        cv_.notify_all();
+        cv_.notify_one();
+        cv_.notify_all();
+    }
+
+    void notify()
+    {
+        cv_.notify_all();
+    }
+
+    bool       ok_  ;
+    bool       l_   ;
+    int        x_   ;
+    zi::mutex  m_   ;
+    zi::condition_variable cv_;
+};
 
 
 }
@@ -254,6 +310,31 @@ ZiTEST( Test_ConditionVariableNotifyOne )
         t2.join();
 
         EXPECT_EQ  ( v, 1001 );
+        EXPECT_TRUE( cvt->ok_ );
+    }
+
+}
+
+ZiTEST( Test_ConditionVariableNotifyMixed )
+{
+    using concurrency_tests::cv_tester3;
+
+    zi::shared_ptr< cv_tester3 > cvt( new cv_tester3() );
+
+    for ( int i = 0; i < 10; ++i )
+    {
+        zi::thread t1( cvt );
+        zi::thread t2( cvt );
+        zi::thread t3( cvt );
+
+        t1.start();
+        t2.start();
+        t3.start();
+
+        t3.join();
+        t2.join();
+        t1.join();
+
         EXPECT_TRUE( cvt->ok_ );
     }
 

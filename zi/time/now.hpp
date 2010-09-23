@@ -72,10 +72,13 @@ inline int64_t sec()
 #endif
 
 NOW_IN_XXX_CONSTRUCT( msec, msec )
+NOW_IN_XXX_CONSTRUCT( msec, msecs )
 NOW_IN_XXX_CONSTRUCT( msec, milliseconds )
 NOW_IN_XXX_CONSTRUCT( usec, usec )
+NOW_IN_XXX_CONSTRUCT( usec, usecs )
 NOW_IN_XXX_CONSTRUCT( usec, microseconds )
 NOW_IN_XXX_CONSTRUCT( nsec, nsec )
+NOW_IN_XXX_CONSTRUCT( nsec, nsecs )
 NOW_IN_XXX_CONSTRUCT( nsec, nanoseconds  )
 
 #undef NOW_IN_XXX_CONSTRUCT

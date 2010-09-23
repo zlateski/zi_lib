@@ -33,8 +33,9 @@
 namespace zi {
 namespace concurrency_ {
 
-// forward declaration
+// forward declarations
 class condition_variable;
+class event;
 
 template< class PtMutexTag > class mutex_tpl: non_copyable
 {
@@ -42,6 +43,7 @@ private:
 
     mutable pthread_mutex_t mutex_;
     friend class condition_variable;
+    friend class event;
 
 public:
 

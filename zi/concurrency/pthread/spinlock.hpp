@@ -20,17 +20,23 @@
 #define ZI_CONCURRENCY_PTHREAD_SPINLOCK_HPP 1
 
 #include <zi/concurrency/config.hpp>
-#include <zi/concurrency/detail/mutex_guard.hpp>
-#include <zi/concurrency/detail/mutex_pool.hpp>
 
-#include <zi/utility/non_copyable.hpp>
-#include <zi/utility/assert.hpp>
-
-#include <pthread.h>
+#if defined( ZI_HAS_PT_SPINLOCK )
+#  include <zi/concurrency/detail/mutex_guard.hpp>
+#  include <zi/concurrency/detail/mutex_pool.hpp>
+#  include <zi/utility/non_copyable.hpp>
+#  include <zi/utility/assert.hpp>
+#  include <pthread.h>
+#
+#else
+#  include <zi/concurrency/pthread/mutex_tpl.hpp>
+#
+#endif
 
 namespace zi {
 namespace concurrency_ {
 
+#if defined( ZI_HAS_PT_SPINLOCK )
 
 class spinlock: non_copyable
 {
@@ -72,7 +78,11 @@ public:
 
 };
 
+#else
 
+typedef mutex_adaptive spinlock;
+
+#endif
 
 } // namespace concurrency_
 } // namespace zi

@@ -35,26 +35,20 @@ ZiTEST( Test_Sink )
     zi::zlog::sink    sink_( ss );
 
     zi::zlog::token_wrapper( sink_ ).get() << "A" << 1 << "C";
+    ss >> s >> s;
+    EXPECT_EQ( s, std::string( "A" ) );
+
     ss >> s;
-    EXPECT_EQ( s, std::string( "A1C" ) );
+    EXPECT_EQ( s, std::string( "1" ) );
 
-    std::stringstream ss1;
-    std::stringstream ss2;
-    zi::zlog::sink    sink1_( ss1 );
-
-    for ( int i = 0; i < 1000; ++i )
-    {
-        zi::zlog::token_wrapper( sink1_ ).get() << i << i + 1 << "Z";
-        ss2 << i << i + 1 << "Z";
-
-        EXPECT_EQ( ss1.str(), ss2.str() );
-    }
+    ss >> s;
+    EXPECT_EQ( s, std::string( "C" ) );
 
     std::stringstream ss3;
     zi::zlog::sink    sink3_( ss3 );
 
     zi::zlog::token_wrapper( sink3_ ).get() << sink3_;
-    ss3 >> s;
+    ss3 >> s >> s;
     EXPECT_EQ( s[0], '<' );
     ss3 >> s;
     EXPECT_EQ( s, std::string( "zi::zlog::sink" ) );

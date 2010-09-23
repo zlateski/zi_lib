@@ -48,12 +48,14 @@ inline void decrement( volatile atomic_word *ptr )
 
 inline atomic_word increment_swap( volatile atomic_word *ptr )
 {
-    return ::InterlockedExchangeAdd( ptr, 1 );
+    //return ::InterlockedExchangeAdd( ptr, 1 );
+    return ::InterlockedIncrement( ptr ) - 1;
 }
 
 inline atomic_word decrement_swap( volatile atomic_word *ptr )
 {
-    return ::InterlockedExchangeAdd( ptr, -1 );
+    //return ::InterlockedExchangeAdd( ptr, -1 );
+    return ::InterlockedDecrement( ptr ) + 1;
 }
 
 inline void write( volatile atomic_word *ptr, atomic_word val )
@@ -63,7 +65,8 @@ inline void write( volatile atomic_word *ptr, atomic_word val )
 
 inline atomic_word read( volatile atomic_word *ptr )
 {
-    return InterlockedCompareExchange( ptr, 0, 0 );
+    // return InterlockedCompareExchange( ptr, 0, 0 );
+    return *ptr;
 }
 
 inline atomic_word test_increment_swap( volatile atomic_word *ptr )
