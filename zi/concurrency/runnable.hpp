@@ -107,7 +107,7 @@ private:
     function< void() > f_;
 
 public:
-    runnable_function_wrapper( function< void() > f ): f_( f )
+    runnable_function_wrapper( const function< void() >& f ): f_( f )
     {
     };
 
@@ -122,7 +122,7 @@ public:
     }
 };
 
-inline shared_ptr< runnable > run_fn( function< void() > f )
+inline shared_ptr< runnable > run_fn( const function< void() >& f )
 {
     return shared_ptr< runnable_function_wrapper >( new runnable_function_wrapper( f ) );
 }

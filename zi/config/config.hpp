@@ -28,7 +28,6 @@
 #  include <zi/config/compiler/msvc.hpp>
 #
 #else
-#
 #  warning "Compiler not supported"
 #
 #endif
@@ -45,7 +44,7 @@
 #  define ZI_OS_WINDOWS
 #  include <zi/config/os/windows.hpp>
 #
-#elif defined( __APPLE__ ) || defined( __APPLE_CC__ ) || defined( macintosh )
+#elif defined( __APPLE__ ) || defined( __APPLE_CC__ ) || defined( macintosh ) || defined( __MACH__ )
 #  define ZI_OS_MACOS
 #  include <zi/config/os/macos.hpp>
 #
@@ -54,7 +53,6 @@
 #  include <zi/config/os/cygwin.hpp>
 #
 #else
-#
 #  warning "OS not supported"
 #
 #endif

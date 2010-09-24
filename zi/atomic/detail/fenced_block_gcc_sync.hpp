@@ -16,21 +16,29 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ZI_CONCURRENCY_CONCURRENCY_HPP
-#define ZI_CONCURRENCY_CONCURRENCY_HPP 1
+#ifndef ZI_ATOMIC_DETAIL_FENCED_BLOCK_GCC_SYNC_HPP
+#define ZI_ATOMIC_DETAIL_FENCED_BLOCK_GCC_SYNC_HPP 1
 
-#include <zi/concurrency/barrier.hpp>
-#include <zi/concurrency/condition_variable.hpp>
-#include <zi/concurrency/event.hpp>
-#include <zi/concurrency/guard.hpp>
-#include <zi/concurrency/monitor.hpp>
-#include <zi/concurrency/mutex.hpp>
-#include <zi/concurrency/runnable.hpp>
-#include <zi/concurrency/periodic_function.hpp>
-#include <zi/concurrency/rwmutex.hpp>
-#include <zi/concurrency/semaphore.hpp>
-#include <zi/concurrency/spinlock.hpp>
-#include <zi/concurrency/task_manager.hpp>
-#include <zi/concurrency/thread.hpp>
+#ifndef ZI_ATOMIC_FENCED_BLOCK_HPP_INCLUDING
+#  error "don't include this file directly, use fenced_block.hpp"
+#endif
+
+class fenced_block: non_copyable
+{
+private:
+    int tmp_;
+
+public:
+    fenced_block(): tmp_( 0 )
+    {
+        __sync_lock_test_and_set( &tmp_, 1 );
+    }
+
+    ~fenced_block()
+    {
+        __sync_lock_release( &tmp_ );
+    }
+
+};
 
 #endif

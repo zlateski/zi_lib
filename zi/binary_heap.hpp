@@ -16,21 +16,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ZI_CONCURRENCY_CONCURRENCY_HPP
-#define ZI_CONCURRENCY_CONCURRENCY_HPP 1
+#ifndef ZI_BINARY_HEAP_HPP
+#define ZI_BINARY_HEAP_HPP 1
 
-#include <zi/concurrency/barrier.hpp>
-#include <zi/concurrency/condition_variable.hpp>
-#include <zi/concurrency/event.hpp>
-#include <zi/concurrency/guard.hpp>
-#include <zi/concurrency/monitor.hpp>
-#include <zi/concurrency/mutex.hpp>
-#include <zi/concurrency/runnable.hpp>
-#include <zi/concurrency/periodic_function.hpp>
-#include <zi/concurrency/rwmutex.hpp>
-#include <zi/concurrency/semaphore.hpp>
-#include <zi/concurrency/spinlock.hpp>
-#include <zi/concurrency/task_manager.hpp>
-#include <zi/concurrency/thread.hpp>
+#include <zi/heap/binary_heap.hpp>
 
 #endif
+

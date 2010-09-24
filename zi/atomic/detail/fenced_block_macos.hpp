@@ -16,33 +16,25 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ZI_ATOMIC_DETAIL_COMPILER_FENCE_HPP
-#define ZI_ATOMIC_DETAIL_COMPILER_FENCE_HPP 1
+#ifndef ZI_ATOMIC_DETAIL_FENCED_BLOCK_MACOS_HPP
+#define ZI_ATOMIC_DETAIL_FENCED_BLOCK_MACOS_HPP 1
 
-#include <zi/atomic/config.hpp>
-
-#if defined(_MSC_VER) && (_MSC_VER >= 1020)
-#  pragma once
+#ifndef ZI_ATOMIC_FENCED_BLOCK_HPP_INCLUDING
+#  error "don't include this file directly, use fenced_block.hpp"
 #endif
-#
-#if defined( _MSC_VER ) && _MSC_VER >= 1310
-#
 
-extern "C" void _ReadWriteBarrier();
+class fenced_block: non_copyable
+{
+public:
+    fenced_block()
+    {
+        OSMemoryBarrier();
+    }
 
-#
-#pragma intrinsic( _ReadWriteBarrier )
-#
-#define ZI_CONCURRENCY_COMPILER_FENCE _ReadWriteBarrier();
-#
-#elif defined(__GNUC__)
-#
-#define ZI_CONCURRENCY_COMPILER_FENCE __asm__ __volatile__( "" : : : "memory" );
-#
-#else
-#
-#define ZI_CONCURRENCY_COMPILER_FENCE
-#
-#endif
+    ~fenced_block()
+    {
+        OSMemoryBarrier();
+    }
+};
 
 #endif

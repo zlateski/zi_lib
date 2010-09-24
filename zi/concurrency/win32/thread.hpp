@@ -53,6 +53,11 @@ private:
     }
 
 public:
+    thread():
+        t_()
+    {
+    }
+
     thread( shared_ptr< runnable > run ):
         t_( new thread_info( run ) )
     {
