@@ -27,6 +27,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstddef>
+#include <vector>
 
 #include <zi/detail/identity.hpp>
 #include <zi/detail/member_function.hpp>
