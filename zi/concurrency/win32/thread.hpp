@@ -29,8 +29,12 @@ namespace zi {
 namespace concurrency_ {
 
 
-struct thread
+template< bool Scoped >
+struct thread_tpl
 {
+public:
+    typedef thread_tpl< true > scoped;
+
 private:
     shared_ptr< thread_info > t_;
 
@@ -53,21 +57,26 @@ private:
     }
 
 public:
-    thread():
+    thread_tpl():
         t_()
     {
     }
 
-    thread( shared_ptr< runnable > run ):
+    thread_tpl( shared_ptr< runnable > run ):
         t_( new thread_info( run ) )
     {
+        if ( Scoped )
+        {
+            start();
+        }
     }
 
-    thread( const reference_wrapper< function< void() > >& f ):
-        t_( new thread_info
-            ( shared_ptr< runnable_function_wrapper >
-              ( new runnable_function_wrapper( f ))))
+    ~thread_tpl()
     {
+        if ( Scoped )
+        {
+            join();
+        }
     }
 
     void start( bool detached = false )
@@ -112,6 +121,18 @@ public:
 
 };
 
+
+struct thread: thread_tpl< false >
+{
+    thread(): thread_tpl< false >()
+    {
+    }
+
+    thread( shared_ptr< runnable > run ): thread_tpl< false >( run )
+    {
+    }
+
+};
 
 } // namespace concurrency_
 } // namespace zi

@@ -199,10 +199,9 @@ ZiTEST( Member_Periodic_Function_Args )
         pf_tester t;
         zi::periodic_function pf( &pf_tester::doit_n, &t, i, zi::interval::nsecs( 1 ) );
 
-        zi::thread th( pf );
-        th.start();
-        th.join();
-
+        {
+            zi::thread::scoped th( pf );
+        }
         EXPECT_EQ( x, i );
     }
 
