@@ -75,13 +75,13 @@ public:
     }
 
     template< class T >
-    inline T elpased( typename enable_if< is_fundamental< T >::value >::type* = 0 )
+    inline T elapsed( typename enable_if< is_fundamental< T >::value >::type* = 0 )
     {
         return T( std::clock() - start_ ) / CLOCKS_PER_SEC;
     }
 
     template< class T >
-    inline T lap_elpased( typename enable_if< is_fundamental< T >::value >::type* = 0 )
+    inline T lap_elapsed( typename enable_if< is_fundamental< T >::value >::type* = 0 )
     {
         return T( std::clock() - lap_start_ ) / CLOCKS_PER_SEC;
     }
@@ -96,13 +96,13 @@ public:
     }
 
     template< class T >
-    inline int64_t elpased( typename disable_if< is_fundamental< T >::value >::type* = 0 )
+    inline int64_t elapsed( typename disable_if< is_fundamental< T >::value >::type* = 0 )
     {
         return convert_( std::clock() - start_, T::factor );
     }
 
     template< class T >
-    inline int64_t lap_elpased( typename disable_if< is_fundamental< T >::value >::type* = 0 )
+    inline int64_t lap_elapsed( typename disable_if< is_fundamental< T >::value >::type* = 0 )
     {
         return convert_( std::clock() - lap_start_, T::factor );
     }
@@ -112,14 +112,14 @@ public:
         return lap< int64_t >();
     }
 
-    inline int64_t elpased()
+    inline int64_t elapsed()
     {
-        return elpased< int64_t >();
+        return elapsed< int64_t >();
     }
 
-    inline int64_t lap_elpased()
+    inline int64_t lap_elapsed()
     {
-        return lap_elpased< int64_t >();
+        return lap_elapsed< int64_t >();
     }
 
 };

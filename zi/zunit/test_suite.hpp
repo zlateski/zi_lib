@@ -123,7 +123,7 @@ public:
 
         if ( passing )
         {
-            timer_.elpased( tv_ );
+            timer_.elapsed( tv_ );
             tout << tos::green << tos::bold << " PASSED " << tos::reset
                  << "| w: " << tv_.wall << " p: " << tv_.process << " "
                  << passed_asserts << " asserts" << '\n';
