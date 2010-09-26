@@ -27,8 +27,6 @@
 namespace zi {
 namespace vl {
 
-// ctors
-
 template< class T, std::size_t S >
 inline matrix< T, S >::matrix( const T& v )
 {
@@ -36,7 +34,7 @@ inline matrix< T, S >::matrix( const T& v )
 }
 
 template< class T, std::size_t S >
-inline matrix< T, S >::matrix( const tags::eye_init_tag_type& )
+inline matrix< T, S >::matrix( detail::eye_init_tag )
 {
     std::fill_n( v_, num_elements, 0 );
     for ( std::size_t i = 0; i < num_elements; i += S + 1 )
@@ -244,10 +242,10 @@ template< class T, std::size_t S >
 const matrix< T, S > matrix< T, S >::one( 1 );
 
 template< class T, std::size_t S >
-const matrix< T, S > matrix< T, S >::eye( tags::eye_init_tag );
+const matrix< T, S > matrix< T, S >::eye( detail::eye_init );
 
 template< class T, std::size_t S >
-const matrix< T, S > matrix< T, S >::identity( tags::eye_init_tag );
+const matrix< T, S > matrix< T, S >::identity( detail::eye_init );
 
 
 } // namespace vl
