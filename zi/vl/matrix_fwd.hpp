@@ -35,16 +35,15 @@
 namespace zi {
 namespace vl {
 
-namespace tags {
+namespace detail {
 
-struct eye_init_tag_type
-{
-    eye_init_tag_type() {}
-};
+struct eye_init_tag {};
 
-const  eye_init_tag_type eye_init_tag;
-
+namespace {
+const eye_init_tag eye_init();
 }
+
+} // namespace detail
 
 template< class T, std::size_t S >
 class matrix
@@ -64,7 +63,7 @@ public:
     matrix() {}
 
     matrix( const T& );
-    matrix( const tags::eye_init_tag_type& );
+    matrix( detail::eye_init_tag );
 
     template< class Y >
     explicit matrix( const matrix< Y, S >& );
