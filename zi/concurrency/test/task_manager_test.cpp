@@ -146,3 +146,32 @@ ZiTEST( Test_PrioritizedTaskManager2 )
     }
 
 }
+
+ZiTEST( TaskManagerStopClearDeadlock )
+{
+    using concurrency_tests::cnt;
+    using concurrency_tests::inc_by;
+
+    cnt = 0;
+
+    zi::task_manager::deque tm( 10 );
+    tm.start();
+
+    for ( int i = 1; i < 100001; ++i )
+    {
+        tm.insert( zi::run_fn( zi::bind( &inc_by, i ) ) );
+    }
+
+    zi::this_thread::sleep( zi::interval::msecs( 20 ) );
+    tm.stop();
+
+    EXPECT_TRUE( true );
+
+    tm.start();
+
+    tm.join();
+
+    EXPECT_GT( cnt, 1 );
+    EXPECT_LT( cnt, 100000LL * 100001LL / 2 );
+
+}

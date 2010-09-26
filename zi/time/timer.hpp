@@ -69,16 +69,16 @@ public:
         v.process = process_.template lap< T >();
     }
 
-    template< class T > inline void elpased( ::zi::timer::tv< T > &v )
+    template< class T > inline void elapsed( ::zi::timer::tv< T > &v )
     {
-        v.wall    = wall_.template elpased< T >();
-        v.process = process_.template elpased< T >();
+        v.wall    = wall_.template elapsed< T >();
+        v.process = process_.template elapsed< T >();
     }
 
-    template< class T > inline void lap_elpased( ::zi::timer::tv< T > &v )
+    template< class T > inline void lap_elapsed( ::zi::timer::tv< T > &v )
     {
-        v.wall    = wall_.template lap_elpased< T >();
-        v.process = process_.template lap_elpased< T >();
+        v.wall    = wall_.template lap_elapsed< T >();
+        v.process = process_.template lap_elapsed< T >();
     }
 
 };

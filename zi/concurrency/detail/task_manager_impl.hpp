@@ -225,7 +225,7 @@ struct task_manager_impl
 
         if ( !and_join )
         {
-            clear();
+            tasks_.clear();
         }
 
         kill_workers_nl( active_workers_ );
