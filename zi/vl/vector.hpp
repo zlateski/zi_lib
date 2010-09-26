@@ -20,6 +20,7 @@
 #define ZI_VL_VECTOR_HPP 1
 
 #include <zi/vl/vector_fwd.hpp>
+#include <zi/vl/matrix_fwd.hpp>
 #include <numeric>
 
 #include <zi/vl/vl_prefix.hpp>
@@ -27,236 +28,18 @@
 namespace zi {
 namespace vl {
 
-// ctors
-
 template< class T, std::size_t S >
-inline vector< T, S >::vector( const T& v )
-{
-    std::fill_n( v_, S, v );
-}
-
-template< class T, std::size_t S >
-inline vector< T, S >::vector( const T& x, const T& y )
-{
-    ZI_VERIFY( S > 1 );
-    v_[ 0 ] = x;
-    v_[ 1 ] = y;
-}
-
-template< class T, std::size_t S >
-inline vector< T, S >::vector( const T& x, const T& y, const T& z )
-{
-    ZI_VERIFY( S > 2 );
-    v_[ 0 ] = x;
-    v_[ 1 ] = y;
-    v_[ 2 ] = z;
-}
-
-template< class T, std::size_t S >
-inline vector< T, S >::vector( const T& x, const T& y, const T& z, const T& t )
-{
-    ZI_VERIFY( S > 3 );
-    v_[ 0 ] = x;
-    v_[ 1 ] = y;
-    v_[ 2 ] = z;
-    v_[ 3 ] = t;
-}
-
-template< class T, std::size_t S >
-template< class Y >
-inline vector< T, S >::vector( const vector< Y, S >& other )
-{
-    this->set( other );
-}
-
-template< class T, std::size_t S >
-template< class Y, std::size_t Z >
-inline vector< T, S >::vector( const vector< Y, Z >& other, const T& x,
-                               ZI_VL_ENABLE_IF( S == Z + 1, Y ) )
-{
-    this->set( other, x );
-}
-
-template< class T, std::size_t S >
-template< class Y, std::size_t Z >
-inline vector< T, S >::vector( const T& x, const vector< Y, Z >& other,
-                        ZI_VL_ENABLE_IF( S == Z + 1, Y ) )
-{
-    this->set( x, other );
-}
-
-template< class T, std::size_t S >
-inline const T& vector< T, S >::operator[]( std::size_t i ) const
+inline const T& vector< T, S >::at( std::size_t i ) const
 {
     ZI_VERIFY( S > i );
     return v_[ i ];
 }
 
 template< class T, std::size_t S >
-inline const T& vector< T, S >::operator()( std::size_t i ) const
+inline T& vector< T, S >::at( std::size_t i )
 {
     ZI_VERIFY( S > i );
     return v_[ i ];
-}
-
-template< class T, std::size_t S >
-inline T& vector< T, S >::operator[]( std::size_t i )
-{
-    ZI_VERIFY( S > i );
-    return v_[ i ];
-}
-
-template< class T, std::size_t S >
-inline T& vector< T, S >::operator()( std::size_t i )
-{
-    ZI_VERIFY( S > i );
-    return v_[ i ];
-}
-
-template< class T, std::size_t S >
-inline const T& vector< T, S >::x() const
-{
-    return v_[ 0 ];
-}
-
-template< class T, std::size_t S >
-inline const T& vector< T, S >::y() const
-{
-    ZI_VERIFY( S > 1 );
-    return v_[ 1 ];
-}
-
-template< class T, std::size_t S >
-inline const T& vector< T, S >::z() const
-{
-    ZI_VERIFY( S > 2 );
-    return v_[ 2 ];
-}
-
-template< class T, std::size_t S >
-inline const T& vector< T, S >::t() const
-{
-    ZI_VERIFY( S > 3 );
-    return v_[ 3 ];
-}
-
-template< class T, std::size_t S >
-inline const T& vector< T, S >::w() const
-{
-    ZI_VERIFY( S > 3 );
-    return v_[ 3 ];
-}
-
-template< class T, std::size_t S >
-inline T& vector< T, S >::x()
-{
-    return v_[ 0 ];
-}
-
-template< class T, std::size_t S >
-inline T& vector< T, S >::y()
-{
-    ZI_VERIFY( S > 1 );
-    return v_[ 1 ];
-}
-
-template< class T, std::size_t S >
-inline T& vector< T, S >::z()
-{
-    ZI_VERIFY( S > 2 );
-    return v_[ 2 ];
-}
-
-template< class T, std::size_t S >
-inline T& vector< T, S >::t()
-{
-    ZI_VERIFY( S > 3 );
-    return v_[ 3 ];
-}
-
-template< class T, std::size_t S >
-inline T& vector< T, S >::w()
-{
-    ZI_VERIFY( S > 3 );
-    return v_[ 3 ];
-}
-
-template< class T, std::size_t S >
-inline const T& vector< T, S >::r() const
-{
-    return v_[ 0 ];
-}
-
-template< class T, std::size_t S >
-inline const T& vector< T, S >::g() const
-{
-    ZI_VERIFY( S > 1 );
-    return v_[ 1 ];
-}
-
-template< class T, std::size_t S >
-inline const T& vector< T, S >::b() const
-{
-    ZI_VERIFY( S > 2 );
-    return v_[ 2 ];
-}
-
-template< class T, std::size_t S >
-inline const T& vector< T, S >::a() const
-{
-    ZI_VERIFY( S > 3 );
-    return v_[ 3 ];
-}
-
-template< class T, std::size_t S >
-inline T& vector< T, S >::r()
-{
-    return v_[ 0 ];
-}
-
-template< class T, std::size_t S >
-inline T& vector< T, S >::g()
-{
-    ZI_VERIFY( S > 1 );
-    return v_[ 1 ];
-}
-
-template< class T, std::size_t S >
-inline T& vector< T, S >::b()
-{
-    ZI_VERIFY( S > 2 );
-    return v_[ 2 ];
-}
-
-template< class T, std::size_t S >
-inline T& vector< T, S >::a()
-{
-    ZI_VERIFY( S > 3 );
-    return v_[ 3 ];
-}
-
-template< class T, std::size_t S >
-inline vector< T, S >::operator const T*() const
-{
-    return v_;
-}
-
-template< class T, std::size_t S >
-inline vector< T, S >::operator T*()
-{
-    return v_;
-}
-
-template< class T, std::size_t S >
-inline const T* vector< T, S >::data() const
-{
-    return v_;
-}
-
-template< class T, std::size_t S >
-inline T* vector< T, S >::data()
-{
-    return v_;
 }
 
 template< class T, std::size_t S >
@@ -346,7 +129,7 @@ inline vector< T, S >& vector< T, S >::operator/=( const T& o )
 
 template< class T, std::size_t S >
 template< class Y >
-inline vector< T, S > vector< T, S >::operator+( const vector< Y, S >& o )
+inline vector< T, S > vector< T, S >::operator+( const vector< Y, S >& o ) const
 {
     vector< T, S > r( *this );
     r += o;
@@ -355,7 +138,7 @@ inline vector< T, S > vector< T, S >::operator+( const vector< Y, S >& o )
 
 template< class T, std::size_t S >
 template< class Y >
-inline vector< T, S > vector< T, S >::operator-( const vector< Y, S >& o )
+inline vector< T, S > vector< T, S >::operator-( const vector< Y, S >& o ) const
 {
     vector< T, S > r( *this );
     r -= o;
@@ -364,7 +147,7 @@ inline vector< T, S > vector< T, S >::operator-( const vector< Y, S >& o )
 
 template< class T, std::size_t S >
 template< class Y >
-inline vector< T, S > vector< T, S >::operator*( const vector< Y, S >& o )
+inline vector< T, S > vector< T, S >::operator*( const vector< Y, S >& o ) const
 {
     vector< T, S > r( *this );
     r *= o;
@@ -373,7 +156,7 @@ inline vector< T, S > vector< T, S >::operator*( const vector< Y, S >& o )
 
 template< class T, std::size_t S >
 template< class Y >
-inline vector< T, S > vector< T, S >::operator/( const vector< Y, S >& o )
+inline vector< T, S > vector< T, S >::operator/( const vector< Y, S >& o ) const
 {
     vector< T, S > r( *this );
     r /= o;
@@ -381,7 +164,7 @@ inline vector< T, S > vector< T, S >::operator/( const vector< Y, S >& o )
 }
 
 template< class T, std::size_t S >
-inline vector< T, S > vector< T, S >::operator+( const T& o )
+inline vector< T, S > vector< T, S >::operator+( const T& o ) const
 {
     vector< T, S > r( *this );
     r += o;
@@ -389,7 +172,7 @@ inline vector< T, S > vector< T, S >::operator+( const T& o )
 }
 
 template< class T, std::size_t S >
-inline vector< T, S > vector< T, S >::operator-( const T& o )
+inline vector< T, S > vector< T, S >::operator-( const T& o ) const
 {
     vector< T, S > r( *this );
     r -= o;
@@ -397,7 +180,7 @@ inline vector< T, S > vector< T, S >::operator-( const T& o )
 }
 
 template< class T, std::size_t S >
-inline vector< T, S > vector< T, S >::operator*( const T& o )
+inline vector< T, S > vector< T, S >::operator*( const T& o ) const
 {
     vector< T, S > r( *this );
     r *= o;
@@ -405,31 +188,11 @@ inline vector< T, S > vector< T, S >::operator*( const T& o )
 }
 
 template< class T, std::size_t S >
-inline vector< T, S > vector< T, S >::operator/( const T& o )
+inline vector< T, S > vector< T, S >::operator/( const T& o ) const
 {
     vector< T, S > r( *this );
     r /= o;
     return r;
-}
-
-template< class T, std::size_t S >
-template< class Y >
-inline const vector< T, S >& vector< T, S >::operator=( const vector< Y, S >& o )
-{
-    this->set( o );
-    return *this;
-}
-
-template< class T, std::size_t S >
-inline void vector< T, S >::operator=( const T& o )
-{
-    this->fill( o );
-}
-
-template< class T, std::size_t S >
-inline void vector< T, S >::fill( const T& v )
-{
-    std::fill_n( v_, S, v );
 }
 
 template< class T, std::size_t S >
@@ -512,7 +275,7 @@ inline vector< T, S > vector< T, S >::operator-() const
 }
 
 template< class T, std::size_t S >
-inline const vector< T, S >& vector< T, S >::negate()
+inline vector< T, S >& vector< T, S >::negate()
 {
     for ( std::size_t i = 0; i < S; ++i )
     {
@@ -520,17 +283,6 @@ inline const vector< T, S >& vector< T, S >::negate()
     }
     return *this;
 
-}
-
-template< class T, std::size_t S >
-template< class Y >
-inline void vector< T, S >::negate( const vector< Y, S >& other )
-{
-    for ( std::size_t i = 0; i < S; ++i )
-    {
-        v_[ i ] = - other.v_[ i ];
-    }
-    return *this;
 }
 
 template< class T, std::size_t S >
@@ -633,44 +385,16 @@ inline void vector< T, S >::clamp( const T& min, const T& max )
 
 template< class T, std::size_t S >
 template< class Y >
-inline bool vector< T, S >::operator==( const vector< Y, S >& other )
+inline bool vector< T, S >::operator==( const vector< Y, S >& other ) const
 {
     return std::equal( v_, v_ + S, other.v_ );
 }
 
 template< class T, std::size_t S >
 template< class Y >
-inline bool vector< T, S >::operator!=( const vector< Y, S >& other )
-{
-    return !( *this == other );
-}
-
-template< class T, std::size_t S >
-template< class Y >
-inline bool vector< T, S >::operator<=( const vector< Y, S >& other )
-{
-    return !( other < *this );
-}
-
-template< class T, std::size_t S >
-template< class Y >
-inline bool vector< T, S >::operator>=( const vector< Y, S >& other )
-{
-    return !( *this < other );
-}
-
-template< class T, std::size_t S >
-template< class Y >
-inline bool vector< T, S >::operator<( const vector< Y, S >& other )
+inline bool vector< T, S >::operator<( const vector< Y, S >& other ) const
 {
     return std::lexicographical_compare( v_, v_ + S, other.v_, other.v_ + S );
-}
-
-template< class T, std::size_t S >
-template< class Y >
-inline bool vector< T, S >::operator>( const vector< Y, S >& other )
-{
-    return !( *this >= other );
 }
 
 template< class T, std::size_t S >

@@ -40,63 +40,108 @@ private:
     ZI_STATIC_ASSERT( S > 0 , zero_length_vector );
     ZI_STATIC_ASSERT( is_scalar< T >::value , non_scalar_vector );
 
-public:
+protected:
     T v_[ S ];
 
 public:
     template< class Y, std::size_t Z > friend class vector;
 
+    // ctors
+    //---------------------------------------------------------------------
+
     vector() {}
 
-    vector( const T& );
-    vector( const T&, const T& );
-    vector( const T&, const T&, const T& );
-    vector( const T&, const T&, const T&, const T& );
+    vector( const T& v ) { set( v ); }
+    vector( const T& x, const T& y ) { set( x, y ); }
+    vector( const T& x, const T& y, const T& z ) { set( x, y, z ); }
+    vector( const T& x, const T& y, const T& z, const T& t ) { set( x, y, z, t ); }
 
-    template< class Y >
-    explicit vector( const vector< Y, S >& );
+    template< class Y > explicit vector( const vector< Y, S >& v )
+    {
+        set( v );
+    }
 
-    template< class Y, std::size_t Z >
-    explicit vector( const vector< Y, Z >&, const T& = T( 0 ),
-                     ZI_VL_ENABLE_IF( S == Z + 1, Y ) = 0 );
+    template< class Y, std::size_t Z > explicit vector( const vector< Y, Z >& v, const T& t,
+                                                        ZI_VL_ENABLE_IF( S == Z + 1, Y ) = 0 )
+    {
+        set( v, t );
+    }
 
-    template< class Y, std::size_t Z >
-    explicit vector( const T&, const vector< Y, Z >&,
-                     ZI_VL_ENABLE_IF( S == Z + 1, Y ) = 0 );
+    template< class Y, std::size_t Z > explicit vector( const T& t, const vector< Y, Z >& v,
+                                                        ZI_VL_ENABLE_IF( S == Z + 1, Y ) = 0 )
+    {
+        set( t, v );
+    }
 
-    const T& operator[]( std::size_t ) const;
-    const T& operator()( std::size_t ) const;
+    // to homogenous
+    template< class Y, std::size_t Z > vector( const vector< Y, Z >& v,
+                                               ZI_VL_ENABLE_IF( S + 1 == Z, Y ) = 0 )
+    {
+        *this = v;
+    }
 
-    T& operator[]( std::size_t );
-    T& operator()( std::size_t );
+    // from homogenous
+    template< class Y, std::size_t Z > vector( const vector< Y, Z >& v,
+                                               ZI_VL_ENABLE_IF( S == Z + 1, Y ) = 0 )
+    {
+        set( v, 1 );
+    }
 
-    const T& x() const;
-    const T& y() const;
-    const T& z() const;
-    const T& w() const;
-    const T& t() const;
+    // access
+    //---------------------------------------------------------------------
 
-    T& x();
-    T& y();
-    T& z();
-    T& w();
-    T& t();
+    inline const T& at( std::size_t ) const;
+    inline const T& operator[]( std::size_t i ) const { return at( i ); }
+    inline const T& operator()( std::size_t i ) const { return at( i ); }
 
-    const T& r() const;
-    const T& g() const;
-    const T& b() const;
-    const T& a() const;
+    inline T& at( std::size_t );
+    inline T& operator[]( std::size_t i ) { return at( i ); }
+    inline T& operator()( std::size_t i ) { return at( i ); }
 
-    T& r();
-    T& g();
-    T& b();
-    T& a();
+    inline const T& x() const { return at( 0 ); }
+    inline const T& y() const { return at( 1 ); }
+    inline const T& z() const { return at( 2 ); }
+    inline const T& w() const { return at( 3 ); }
+    inline const T& t() const { return at( 3 ); }
 
-    operator const T*() const;
-    operator T*();
+    inline T& x() { return at( 0 ); }
+    inline T& y() { return at( 1 ); }
+    inline T& z() { return at( 2 ); }
+    inline T& w() { return at( 3 ); }
+    inline T& t() { return at( 4 ); }
 
-    const T* data() const;
-    T* data();
+    inline const T& r() const { return at( 0 ); }
+    inline const T& g() const { return at( 1 ); }
+    inline const T& b() const { return at( 2 ); }
+    inline const T& a() const { return at( 3 ); }
+
+    inline T& r() { return at( 0 ); }
+    inline T& g() { return at( 1 ); }
+    inline T& b() { return at( 2 ); }
+    inline T& a() { return at( 3 ); }
+
+    // data ptrs
+    //---------------------------------------------------------------------
+
+    inline operator const T*() const { return v_; }
+    inline operator T*() { return v_; }
+
+    inline const T* data() const { return v_; }
+    inline T* data() { return v_; }
+
+    // comperison operators
+    //---------------------------------------------------------------------
+
+    template< class Y > inline bool operator==( const vector< Y, S >& ) const ;
+    template< class Y > inline bool operator< ( const vector< Y, S >& ) const ;
+
+    template< class Y > inline bool operator!=( const vector< Y, S >& o ) const { return !( *this == o ); }
+    template< class Y > inline bool operator<=( const vector< Y, S >& o ) const { return !( o < *this );  }
+    template< class Y > inline bool operator>=( const vector< Y, S >& o ) const { return !( *this < o );  }
+    template< class Y > inline bool operator> ( const vector< Y, S >& o ) const { return o < *this;       }
+
+    // unary arithmetic operators
+    //---------------------------------------------------------------------
 
     template< class Y > vector< T, S >& operator+=( const vector< Y, S >& );
     template< class Y > vector< T, S >& operator-=( const vector< Y, S >& );
@@ -108,20 +153,62 @@ public:
     vector< T, S >& operator*=( const T& );
     vector< T, S >& operator/=( const T& );
 
-    template< class Y > vector< T, S > operator+( const vector< Y, S >& );
-    template< class Y > vector< T, S > operator-( const vector< Y, S >& );
-    template< class Y > vector< T, S > operator*( const vector< Y, S >& );
-    template< class Y > vector< T, S > operator/( const vector< Y, S >& );
+    vector< T, S > operator-() const;
 
-    vector< T, S > operator+( const T& );
-    vector< T, S > operator-( const T& );
-    vector< T, S > operator*( const T& );
-    vector< T, S > operator/( const T& );
+    // unary arithmetic operators
+    //---------------------------------------------------------------------
 
-    template< class Y > const vector< T, S >& operator=( const vector< Y, S >& );
-    void operator=( const T& );
+    template< class Y > inline vector< T, S > operator+( const vector< Y, S >& ) const ;
+    template< class Y > inline vector< T, S > operator-( const vector< Y, S >& ) const ;
+    template< class Y > inline vector< T, S > operator*( const vector< Y, S >& ) const ;
+    template< class Y > inline vector< T, S > operator/( const vector< Y, S >& ) const ;
 
-    void fill( const T& );
+    inline vector< T, S > operator+( const T& ) const ;
+    inline vector< T, S > operator-( const T& ) const ;
+    inline vector< T, S > operator*( const T& ) const ;
+    inline vector< T, S > operator/( const T& ) const ;
+
+    friend inline vector< T, S > operator+( const T& t, const vector< T, S >& v ) { return  v + t; }
+    friend inline vector< T, S > operator-( const T& t, const vector< T, S >& v ) { return -v + t; }
+    friend inline vector< T, S > operator*( const T& t, const vector< T, S >& v ) { return  v * t; }
+
+    // assignment operators
+    //---------------------------------------------------------------------
+
+    template< class Y >
+    vector< T, S >& operator=( const vector< Y, S >& other )
+    {
+        set( other );
+        return *this;
+    }
+
+    vector< T, S >& operator=( const T& v )
+    {
+        set( v );
+        return *this;
+    }
+
+    // to homogenous
+    template< class Y, std::size_t Z >
+    typename enable_if< ( Z == S + 1 ), vector< T, S >& >::type
+    operator= ( const vector< Y, Z >& other )
+    {
+        const T scale = other.v_[ S ];
+        std::copy( other.v_, other.v_ + S, v_ );
+        *this /= scale;
+        return *this;
+    }
+
+    // from homogenous
+    template< class Y, std::size_t Z >
+    typename enable_if< ( Z + 1 == S ), vector< T, S >& >::type
+    operator= ( const vector< Y, Z >& other )
+    {
+        set( other, 1 );
+        return *this;
+    }
+
+    void fill( const T& v ) { set( v ); }
     template< class Iterator > void assign( Iterator, Iterator );
 
     void set( const T& );
@@ -141,12 +228,16 @@ public:
 
     bool equal( const vector< T, S >& );
 
-    vector< T, S > operator-() const;
-
-    const vector< T, S >& negate();
-    template< class Y > void negate( const vector< Y, S >& );
+    vector< T, S >& negate();
+    template< class Y > vector< T, S >& negate( const vector< Y, S >& v )
+    {
+        set( v );
+        return negate();
+    }
 
     template< class Y > T dot( const vector< Y, S >& ) const;
+
+    // cross products!
 
     template< class Y, class W >
     void cross( const vector< Y, S >&, const vector< W, S >&,
@@ -171,13 +262,6 @@ public:
 
     template< typename Y > void scale_to( const T& = T( -1 ), const T& = T( 1 ) );
     template< typename Y > void scale_to( vector< Y, S >&, const T& = T( -1 ), const T& = T( 1 ) );
-
-    template< class Y > bool operator==( const vector< Y, S >& );
-    template< class Y > bool operator!=( const vector< Y, S >& );
-    template< class Y > bool operator<=( const vector< Y, S >& );
-    template< class Y > bool operator>=( const vector< Y, S >& );
-    template< class Y > bool operator< ( const vector< Y, S >& );
-    template< class Y > bool operator> ( const vector< Y, S >& );
 
     static const vector one;
     static const vector zero;

@@ -42,7 +42,7 @@ struct eye_init_tag_type
     eye_init_tag_type() {}
 };
 
-const  eye_init_tag_type eye_init_tag;
+const eye_init_tag_type eye_init_tag;
 
 }
 
@@ -69,18 +69,21 @@ public:
     template< class Y >
     explicit matrix( const matrix< Y, S >& );
 
-    const vector< T, S >& operator[]( std::size_t ) const;
-    vector< T, S >& operator[]( std::size_t );
+    vector< T, S > operator[]( std::size_t ) const;
+    vector< T, S > row( std::size_t ) const;
+    vector< T, S > col( std::size_t ) const;
 
     const T& operator()( std::size_t, std::size_t ) const;
     T& operator()( std::size_t, std::size_t );
+
+    const T& at( std::size_t, std::size_t ) const;
+    T& at( std::size_t, std::size_t );
 
     operator const T*() const;
     operator T*();
 
     const T* data() const;
     T* data();
-
 
     template< class Y > matrix< T, S >& operator+=( const matrix< Y, S >& );
     template< class Y > matrix< T, S >& operator-=( const matrix< Y, S >& );
@@ -97,16 +100,26 @@ public:
     matrix< T, S >& operator*=( const T& );
     matrix< T, S >& operator/=( const T& );
 
-/*    template< class Y > matrix< T, S > operator+( const matrix< Y, S >& );
+    template< class Y > matrix< T, S > operator+( const matrix< Y, S >& );
     template< class Y > matrix< T, S > operator-( const matrix< Y, S >& );
     template< class Y > matrix< T, S > operator*( const matrix< Y, S >& );
     template< class Y > matrix< T, S > operator/( const matrix< Y, S >& );
+
+    template< class Y > matrix< T, S > operator+( const vector< Y, S >& );
+    template< class Y > matrix< T, S > operator-( const vector< Y, S >& );
+    template< class Y > vector< T, S > operator*( const vector< Y, S >& );
+    template< class Y > matrix< T, S > operator/( const vector< Y, S >& );
 
     matrix< T, S > operator+( const T& );
     matrix< T, S > operator-( const T& );
     matrix< T, S > operator*( const T& );
     matrix< T, S > operator/( const T& );
 
+    matrix< T, S >& transpose();
+    template< class Y > matrix< T, S >& transpose( const matrix< Y, S >& );
+    template< class Y > void transpose_to( matrix< Y, S >& ) const;
+
+/*
     template< class Y > const matrix< T, S >& operator=( const matrix< Y, S >& );
     void operator=( const T& );
 

@@ -53,17 +53,34 @@ inline matrix< T, S >::matrix( const matrix< Y, S >& other )
 }
 
 template< class T, std::size_t S >
-inline const vector< T, S >& matrix< T, S >::operator[]( std::size_t r ) const
+inline vector< T, S > matrix< T, S >::operator[]( std::size_t r ) const
 {
     ZI_VERIFY( r < S );
-    return *reinterpret_cast< const vector< T, S >* >( v_ + r * S );
+    vector< T, S > ret;
+    std::copy( v_ + r * S, v_ + r * S + S, ret.v_ );
+    return ret;
 }
 
 template< class T, std::size_t S >
-inline vector< T, S >& matrix< T, S >::operator[]( std::size_t r )
+inline vector< T, S > matrix< T, S >::row( std::size_t r ) const
 {
     ZI_VERIFY( r < S );
-    return *reinterpret_cast< vector< T, S >* >( v_ + r * S );
+    vector< T, S > ret;
+    std::copy( v_ + r * S, v_ + r * S + S, ret.v_ );
+    return ret;
+}
+
+template< class T, std::size_t S >
+inline vector< T, S > matrix< T, S >::col( std::size_t r ) const
+{
+    ZI_VERIFY( r < S );
+    vector< T, S > ret;
+    std::size_t d = 0;
+    for ( std::size_t it = r; it < num_elements; it += S )
+    {
+        ret.v_[ d++ ] = v_[ it ];
+    }
+    return ret;
 }
 
 template< class T, std::size_t S >
@@ -75,6 +92,20 @@ inline const T& matrix< T, S >::operator()( std::size_t r, std::size_t c ) const
 
 template< class T, std::size_t S >
 inline T& matrix< T, S >::operator()( std::size_t r, std::size_t c )
+{
+    ZI_VERIFY( r < S && c < S );
+    return v_[ S * r + c ];
+}
+
+template< class T, std::size_t S >
+inline const T& matrix< T, S >::at( std::size_t r, std::size_t c ) const
+{
+    ZI_VERIFY( r < S && c < S );
+    return v_[ S * r + c ];
+}
+
+template< class T, std::size_t S >
+inline T& matrix< T, S >::at( std::size_t r, std::size_t c )
 {
     ZI_VERIFY( r < S && c < S );
     return v_[ S * r + c ];
@@ -235,7 +266,168 @@ inline matrix< T, S >& matrix< T, S >::operator /=( const T& v )
     return *this;
 }
 
+template< class T, std::size_t S >
+template< class Y >
+inline matrix< T, S > matrix< T, S >::operator +( const matrix< Y, S >& other )
+{
+    matrix< T, S > r( *this );
+    r += other;
+    return r;
+}
 
+template< class T, std::size_t S >
+template< class Y >
+inline matrix< T, S > matrix< T, S >::operator -( const matrix< Y, S >& other )
+{
+    matrix< T, S > r( *this );
+    r -= other;
+    return r;
+}
+
+template< class T, std::size_t S >
+template< class Y >
+inline matrix< T, S > matrix< T, S >::operator *( const matrix< Y, S >& other )
+{
+    matrix< T, S > r( *this );
+    r *= other;
+    return r;
+}
+
+template< class T, std::size_t S >
+template< class Y >
+inline matrix< T, S > matrix< T, S >::operator /( const matrix< Y, S >& other )
+{
+    matrix< T, S > r( *this );
+    r /= other;
+    return r;
+}
+
+template< class T, std::size_t S >
+template< class Y >
+inline matrix< T, S > matrix< T, S >::operator +( const vector< Y, S >& other )
+{
+    matrix< T, S > r( *this );
+    r += other;
+    return r;
+}
+
+template< class T, std::size_t S >
+template< class Y >
+inline matrix< T, S > matrix< T, S >::operator -( const vector< Y, S >& other )
+{
+    matrix< T, S > r( *this );
+    r -= other;
+    return r;
+}
+
+template< class T, std::size_t S >
+template< class Y >
+inline vector< T, S > matrix< T, S >::operator *( const vector< Y, S >& other )
+{
+    vector< T, S > r( 0 );
+    for ( std::size_t row = 0; row < num_elements; row += S )
+    {
+        for ( std::size_t col = 0; col < S; ++col )
+        {
+            r.v_[ col ] += other.v_[ col ] * v_[ row + col ];
+        }
+    }
+    return r;
+}
+
+template< class T, std::size_t S >
+template< class Y >
+inline matrix< T, S > matrix< T, S >::operator /( const vector< Y, S >& other )
+{
+    matrix< T, S > r( *this );
+    r /= other;
+    return r;
+}
+
+template< class T, std::size_t S >
+inline matrix< T, S > matrix< T, S >::operator +( const T& v )
+{
+    matrix< T, S > r( *this );
+    r += v;
+    return r;
+}
+
+template< class T, std::size_t S >
+inline matrix< T, S > matrix< T, S >::operator -( const T& v )
+{
+    matrix< T, S > r( *this );
+    r -= v;
+    return r;
+}
+
+template< class T, std::size_t S >
+inline matrix< T, S > matrix< T, S >::operator *( const T& v )
+{
+    matrix< T, S > r( *this );
+    r *= v;
+    return r;
+}
+
+template< class T, std::size_t S >
+inline matrix< T, S > matrix< T, S >::operator /( const T& v )
+{
+    matrix< T, S > r( *this );
+    r /= v;
+    return r;
+}
+
+template< class T, std::size_t S >
+inline matrix< T, S >& matrix< T, S >::transpose()
+{
+    for ( std::size_t row = 0; row < S; ++row )
+    {
+        for ( std::size_t col = 0; col < row; ++col )
+        {
+            std::swap( at( row, col ), at( col, row ) );
+        }
+    }
+    return *this;
+}
+
+template< class T, std::size_t S >
+template< class Y >
+inline matrix< T, S >& matrix< T, S >::transpose( const matrix< Y, S >& other )
+{
+    if ( reinterpret_cast< const char* >( &other ) ==
+         const_cast< const char* >( reinterpret_cast< char* >( this ) ) )
+    {
+        return transpose();
+    }
+
+    for ( std::size_t row = 0; row < S; ++row )
+    {
+        for ( std::size_t col = 0; col < S; ++col )
+        {
+            at( row, col ) = other.at( col, row );
+        }
+    }
+    return *this;
+}
+
+template< class T, std::size_t S >
+template< class Y >
+inline void matrix< T, S >::transpose_to( matrix< Y, S >& other ) const
+{
+    if ( const_cast< const char* >( reinterpret_cast< char* >( &other ) ) ==
+         reinterpret_cast< const char* >( this ) )
+    {
+        other.transpose();
+        return;
+    }
+
+    for ( std::size_t row = 0; row < S; ++row )
+    {
+        for ( std::size_t col = 0; col < S; ++col )
+        {
+            other.at( row, col ) = at( col, row );
+        }
+    }
+}
 
 template< class T, std::size_t S >
 const matrix< T, S > matrix< T, S >::zero( 0 );
