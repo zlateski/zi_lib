@@ -20,6 +20,7 @@
 #define ZI_ZLOG_ZLOG_HPP 1
 
 #include <zi/zargs/zargs.hpp>
+#include <zi/zlog/log_printf.hpp>
 #include <zi/zlog/logs.hpp>
 #include <zi/zlog/registry.hpp>
 

@@ -32,21 +32,25 @@
 #  define FOR_EACH_RANGE( it, begin, end )                              \
     for (__typeof__( begin ) it = ( begin ); it != ( end ); ++it)
 
-#ifndef foreach
-#  define foreach( it, cnt ) FOR_EACH( it, cnt )
-#endif
+#  ifndef ZI_NO_LOWERCASE_FOREACH
+#
+#    ifndef foreach
+#      define foreach( it, cnt ) FOR_EACH( it, cnt )
+#    endif
+#
+#    ifndef foreach_r
+#      define foreach_r( it, cnt ) FOR_EACH_R( it, cnt )
+#    endif
+#
+#    ifndef foreach_range
+#      define foreach_range( it, begin, end ) FOR_EACH_RANGE( it, begin, end )
+#    endif
+#
+#  endif // ZI_NO_LOWERCASE_FOREACH
 
-#ifndef foreach_r
-#  define foreach_r( it, cnt ) FOR_EACH_R( it, cnt )
-#endif
-
-#ifndef foreach_range
-#  define foreach_range( it, begin, end ) FOR_EACH_RANGE( it, begin, end )
-#endif
-
-#else
+#else  // defined( __typeof__ ) not defined
 #  error "can't define FOR_EACH macros with no __typeof__ defined"
 
-#endif
+#endif // defined( __typeof__ )
 
 #endif
