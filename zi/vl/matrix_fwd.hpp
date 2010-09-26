@@ -35,6 +35,17 @@
 namespace zi {
 namespace vl {
 
+namespace tags {
+
+struct eye_init_tag_type
+{
+    eye_init_tag_type() {}
+};
+
+const  eye_init_tag_type eye_init_tag;
+
+}
+
 template< class T, std::size_t S >
 class matrix
 {
@@ -43,8 +54,6 @@ private:
     ZI_STATIC_ASSERT( is_scalar< T >::value , non_scalar_matrix );
 
     static const std::size_t num_elements = S * S;
-
-    struct eye_init_tag {};
 
 public:
     T v_[ S * S ];
@@ -55,7 +64,7 @@ public:
     matrix() {}
 
     matrix( const T& );
-    matrix( const eye_init_tag& );
+    matrix( const tags::eye_init_tag_type& );
 
     template< class Y >
     explicit matrix( const matrix< Y, S >& );
@@ -72,17 +81,23 @@ public:
     const T* data() const;
     T* data();
 
+
     template< class Y > matrix< T, S >& operator+=( const matrix< Y, S >& );
     template< class Y > matrix< T, S >& operator-=( const matrix< Y, S >& );
     template< class Y > matrix< T, S >& operator*=( const matrix< Y, S >& );
     template< class Y > matrix< T, S >& operator/=( const matrix< Y, S >& );
+
+    template< class Y > matrix< T, S >& operator+=( const vector< Y, S >& );
+    template< class Y > matrix< T, S >& operator-=( const vector< Y, S >& );
+    template< class Y > matrix< T, S >& operator*=( const vector< Y, S >& );
+    template< class Y > matrix< T, S >& operator/=( const vector< Y, S >& );
 
     matrix< T, S >& operator+=( const T& );
     matrix< T, S >& operator-=( const T& );
     matrix< T, S >& operator*=( const T& );
     matrix< T, S >& operator/=( const T& );
 
-    template< class Y > matrix< T, S > operator+( const matrix< Y, S >& );
+/*    template< class Y > matrix< T, S > operator+( const matrix< Y, S >& );
     template< class Y > matrix< T, S > operator-( const matrix< Y, S >& );
     template< class Y > matrix< T, S > operator*( const matrix< Y, S >& );
     template< class Y > matrix< T, S > operator/( const matrix< Y, S >& );
@@ -193,7 +208,16 @@ inline matrix< T, 3 > cross( const matrix< T, 3 >& x, const matrix< Y, 3 >& y )
 {
     return x;
 }
+*/
 
+
+    static const matrix< T, S > zero;
+    static const matrix< T, S > one;
+    static const matrix< T, S > eye;
+    static const matrix< T, S > identity;
+
+
+};
 
 } // namespace vl
 } // namespace zi
