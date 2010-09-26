@@ -35,6 +35,17 @@
 namespace zi {
 namespace vl {
 
+namespace tags {
+
+struct eye_init_tag_type
+{
+    eye_init_tag_type() {}
+};
+
+const eye_init_tag_type eye_init_tag;
+
+}
+
 template< class T, std::size_t S >
 class matrix
 {
@@ -43,8 +54,6 @@ private:
     ZI_STATIC_ASSERT( is_scalar< T >::value , non_scalar_matrix );
 
     static const std::size_t num_elements = S * S;
-
-    struct eye_init_tag {};
 
 public:
     T v_[ S * S ];
@@ -55,16 +64,20 @@ public:
     matrix() {}
 
     matrix( const T& );
-    matrix( const eye_init_tag& );
+    matrix( const tags::eye_init_tag_type& );
 
     template< class Y >
     explicit matrix( const matrix< Y, S >& );
 
-    const vector< T, S >& operator[]( std::size_t ) const;
-    vector< T, S >& operator[]( std::size_t );
+    vector< T, S > operator[]( std::size_t ) const;
+    vector< T, S > row( std::size_t ) const;
+    vector< T, S > col( std::size_t ) const;
 
     const T& operator()( std::size_t, std::size_t ) const;
     T& operator()( std::size_t, std::size_t );
+
+    const T& at( std::size_t, std::size_t ) const;
+    T& at( std::size_t, std::size_t );
 
     operator const T*() const;
     operator T*();
@@ -77,6 +90,11 @@ public:
     template< class Y > matrix< T, S >& operator*=( const matrix< Y, S >& );
     template< class Y > matrix< T, S >& operator/=( const matrix< Y, S >& );
 
+    template< class Y > matrix< T, S >& operator+=( const vector< Y, S >& );
+    template< class Y > matrix< T, S >& operator-=( const vector< Y, S >& );
+    template< class Y > matrix< T, S >& operator*=( const vector< Y, S >& );
+    template< class Y > matrix< T, S >& operator/=( const vector< Y, S >& );
+
     matrix< T, S >& operator+=( const T& );
     matrix< T, S >& operator-=( const T& );
     matrix< T, S >& operator*=( const T& );
@@ -87,11 +105,21 @@ public:
     template< class Y > matrix< T, S > operator*( const matrix< Y, S >& );
     template< class Y > matrix< T, S > operator/( const matrix< Y, S >& );
 
+    template< class Y > matrix< T, S > operator+( const vector< Y, S >& );
+    template< class Y > matrix< T, S > operator-( const vector< Y, S >& );
+    template< class Y > vector< T, S > operator*( const vector< Y, S >& );
+    template< class Y > matrix< T, S > operator/( const vector< Y, S >& );
+
     matrix< T, S > operator+( const T& );
     matrix< T, S > operator-( const T& );
     matrix< T, S > operator*( const T& );
     matrix< T, S > operator/( const T& );
 
+    matrix< T, S >& transpose();
+    template< class Y > matrix< T, S >& transpose( const matrix< Y, S >& );
+    template< class Y > void transpose_to( matrix< Y, S >& ) const;
+
+/*
     template< class Y > const matrix< T, S >& operator=( const matrix< Y, S >& );
     void operator=( const T& );
 
@@ -193,7 +221,16 @@ inline matrix< T, 3 > cross( const matrix< T, 3 >& x, const matrix< Y, 3 >& y )
 {
     return x;
 }
+*/
 
+
+    static const matrix< T, S > zero;
+    static const matrix< T, S > one;
+    static const matrix< T, S > eye;
+    static const matrix< T, S > identity;
+
+
+};
 
 } // namespace vl
 } // namespace zi
