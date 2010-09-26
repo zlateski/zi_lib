@@ -18,7 +18,7 @@
 
 /*
  * to compile (from this directory):
- *   $ g++ example.cpp example_other.cpp -I../../../../ -lpthread -lrt \
+ *   $ g++ example.cpp example_other.cpp -I../../../ -I../../../external/include/ -lpthread -lrt \
  *     -o ziLogExample
  *
  * You need pthread/rt for the threading library. On different platforms
