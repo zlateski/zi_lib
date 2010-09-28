@@ -29,113 +29,7 @@ namespace vl {
 
 // ctors
 
-template< class T, std::size_t S >
-inline matrix< T, S >::matrix( const T& v )
-{
-    std::fill_n( v_, num_elements, v );
-}
-
-template< class T, std::size_t S >
-inline matrix< T, S >::matrix( const tags::eye_init_tag_type& )
-{
-    std::fill_n( v_, num_elements, 0 );
-    for ( std::size_t i = 0; i < num_elements; i += S + 1 )
-    {
-        v_[ i ] = 1;
-    }
-}
-
-template< class T, std::size_t S >
-template< class Y >
-inline matrix< T, S >::matrix( const matrix< Y, S >& other )
-{
-    std::copy( other.v_, other.v_ + num_elements, v_ );
-}
-
-template< class T, std::size_t S >
-inline vector< T, S > matrix< T, S >::operator[]( std::size_t r ) const
-{
-    ZI_VERIFY( r < S );
-    vector< T, S > ret;
-    std::copy( v_ + r * S, v_ + r * S + S, ret.v_ );
-    return ret;
-}
-
-template< class T, std::size_t S >
-inline vector< T, S > matrix< T, S >::row( std::size_t r ) const
-{
-    ZI_VERIFY( r < S );
-    vector< T, S > ret;
-    std::copy( v_ + r * S, v_ + r * S + S, ret.v_ );
-    return ret;
-}
-
-template< class T, std::size_t S >
-inline vector< T, S > matrix< T, S >::col( std::size_t r ) const
-{
-    ZI_VERIFY( r < S );
-    vector< T, S > ret;
-    std::size_t d = 0;
-    for ( std::size_t it = r; it < num_elements; it += S )
-    {
-        ret.v_[ d++ ] = v_[ it ];
-    }
-    return ret;
-}
-
-template< class T, std::size_t S >
-inline const T& matrix< T, S >::operator()( std::size_t r, std::size_t c ) const
-{
-    ZI_VERIFY( r < S && c < S );
-    return v_[ S * r + c ];
-}
-
-template< class T, std::size_t S >
-inline T& matrix< T, S >::operator()( std::size_t r, std::size_t c )
-{
-    ZI_VERIFY( r < S && c < S );
-    return v_[ S * r + c ];
-}
-
-template< class T, std::size_t S >
-inline const T& matrix< T, S >::at( std::size_t r, std::size_t c ) const
-{
-    ZI_VERIFY( r < S && c < S );
-    return v_[ S * r + c ];
-}
-
-template< class T, std::size_t S >
-inline T& matrix< T, S >::at( std::size_t r, std::size_t c )
-{
-    ZI_VERIFY( r < S && c < S );
-    return v_[ S * r + c ];
-}
-
-template< class T, std::size_t S >
-inline matrix< T, S >::operator const T* () const
-{
-    return v_;
-}
-
-template< class T, std::size_t S >
-inline matrix< T, S >::operator T* ()
-{
-    return v_;
-}
-
-template< class T, std::size_t S >
-inline const T* matrix< T, S >::data() const
-{
-    return v_;
-}
-
-template< class T, std::size_t S >
-inline T* matrix< T, S >::data()
-{
-    return v_;
-}
-
-
+/*
 template< class T, std::size_t S >
 template< class Y >
 inline matrix< T, S >& matrix< T, S >::operator +=( const matrix< Y, S >& other )
@@ -440,7 +334,7 @@ const matrix< T, S > matrix< T, S >::eye( tags::eye_init_tag );
 
 template< class T, std::size_t S >
 const matrix< T, S > matrix< T, S >::identity( tags::eye_init_tag );
-
+*/
 
 } // namespace vl
 } // namespace zi
