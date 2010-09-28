@@ -131,6 +131,11 @@ namespace {
 
 static log_sinks &log_sinks_ = log_sinks::instance();
 
+inline void prevent_unused_wariable_warning_for_log_sinks()
+{
+    static_cast< void >( log_sinks_ );
+}
+
 }
 
 } // namespace zlog

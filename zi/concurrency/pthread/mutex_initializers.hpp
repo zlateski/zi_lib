@@ -45,7 +45,11 @@ template<> struct mutex_initializer< mutex_adaptive_tag >
     static void initialize( pthread_mutex_t &ptm)
     {
         static const pthread_mutex_t stored_initializer =
+#if defined( PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP )
             PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
+#else
+            PTHREAD_MUTEX_INITIALIZER;
+#endif
         ptm = stored_initializer;
     }
 };
