@@ -24,17 +24,17 @@
 #
 #undef ZI_VERIFY
 #
-#if defined(NDEBUG) || defined (ZI_NO_DEBUG)
+#if defined( NDEBUG ) || defined ( ZI_NO_DEBUG )
 #
-#  define ZI_VERIFY(what)   ((void)(what))
-#  define ZI_VERIFY_T(what) ((void)(what))
-#  define ZI_VERIFY_0(what) ((void)(what))
+#  define ZI_VERIFY( what )   ( static_cast< void >( what ) )
+#  define ZI_VERIFY_T( what ) ( static_cast< void >( what ) )
+#  define ZI_VERIFY_0( what ) ( static_cast< void >( what ) )
 #
 #else
 #
-#  define ZI_VERIFY(what)   assert(what)
-#  define ZI_VERIFY_T(what) assert(what)
-#  define ZI_VERIFY_0(what) assert(!(what))
+#  define ZI_VERIFY( what )   assert( what )
+#  define ZI_VERIFY_T( what ) assert( what )
+#  define ZI_VERIFY_0( what ) assert( !( what ) )
 #
 #endif
 #

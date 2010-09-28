@@ -37,11 +37,11 @@ protected:
     bool passed_;
 
 public:
-    checker(bool v): passed_(v)
+    checker( bool v ): passed_( v )
     {
     }
 
-    checker(): passed_(true)
+    checker(): passed_( true )
     {
     }
 

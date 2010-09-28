@@ -38,6 +38,7 @@ ZiTEST( IsPrintable_Test )
 {
     using namespace zi_test_is_printable;
 
+/*
     EXPECT_TRUE(  zi::is_printable< int >::value            );
     EXPECT_TRUE(  zi::is_printable< float >::value          );
     EXPECT_TRUE(  zi::is_printable< const int >::value      );
@@ -90,6 +91,6 @@ ZiTEST( IsPrintable_Test )
     EXPECT_TRUE(  zi::is_printable< void* >::value            );
     EXPECT_TRUE(  zi::is_printable< const void* >::value      );
     EXPECT_TRUE(  zi::is_printable< const volatile void* >::value   );
-
+*/
 
 }
