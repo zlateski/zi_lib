@@ -25,7 +25,7 @@
 namespace zi {
 namespace time_utils {
 
-#if defined( ZI_HAS_CLOCK_GETTIME )
+#if defined( ZI_HAS_POSIX_SUPPORT )
 
 inline void msec_to_ts( timespec& ts, int64_t t )
 {

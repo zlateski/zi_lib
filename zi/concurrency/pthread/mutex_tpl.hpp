@@ -49,7 +49,7 @@ public:
 
     mutex_tpl()
     {
-        mutex_initializer< PtMutexTag >::initialize(mutex_);
+        mutex_initializer< PtMutexTag >::initialize( mutex_ );
     }
 
     ~mutex_tpl()
@@ -59,7 +59,7 @@ public:
 
     inline bool try_lock() const
     {
-        return pthread_mutex_trylock( &mutex_ ) == 0;
+        return ( pthread_mutex_trylock( &mutex_ ) == 0 );
     }
 
     inline void lock() const

@@ -36,29 +36,34 @@ template<> struct mutex_initializer< mutex_default_tag >
 {
     static void initialize( pthread_mutex_t &ptm)
     {
+#if defined( __USE_GNU )
         static const pthread_mutex_t stored_initializer =
             PTHREAD_MUTEX_INITIALIZER;
         ptm = stored_initializer;
+#else
+        ZI_VERIFY_0( pthread_mutex_init( &ptm, NULL ) );
+#endif
     }
+
 };
 
 template<> struct mutex_initializer< mutex_adaptive_tag >
 {
     static void initialize( pthread_mutex_t &ptm)
     {
+#if defined( __USE_GNU )
         static const pthread_mutex_t stored_initializer =
-#if defined( PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP )
             PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
-#else
-            PTHREAD_MUTEX_INITIALIZER;
-#endif
         ptm = stored_initializer;
+#else
+        ZI_VERIFY_0( pthread_mutex_init( &ptm, NULL ) );
+#endif
     }
 };
 
 template<> struct mutex_initializer< mutex_recursive_tag >
 {
-#if 0 && defined( PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP )
+#if defined( PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP )
     static void initialize( pthread_mutex_t &ptm )
     {
         static const pthread_mutex_t stored_initializer =
@@ -73,10 +78,8 @@ template<> struct mutex_initializer< mutex_recursive_tag >
 
         recursive_mutex_initializer_impl()
         {
-        ZI_VERIFY_0( pthread_mutexattr_init( &attr_ ) );
-        ZI_VERIFY_0( pthread_mutexattr_settype( &attr_, PTHREAD_MUTEX_RECURSIVE ) );
-
-
+	    ZI_VERIFY_0( pthread_mutexattr_init( &attr_ ) );
+            ZI_VERIFY_0( pthread_mutexattr_settype( &attr_, PTHREAD_MUTEX_RECURSIVE ) );
         }
 
         ~recursive_mutex_initializer_impl()

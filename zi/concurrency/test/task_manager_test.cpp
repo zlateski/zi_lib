@@ -157,10 +157,11 @@ ZiTEST( TaskManagerStopClearDeadlock )
     zi::task_manager::deque tm( 10 );
     tm.start();
 
-    for ( int i = 1; i < 100001; ++i )
+    for ( int i = 1; i < 1001; ++i )
     {
         tm.insert( zi::run_fn( zi::bind( &inc_by, i ) ) );
     }
+
 
     zi::this_thread::sleep( zi::interval::msecs( 20 ) );
     tm.stop();
@@ -168,7 +169,6 @@ ZiTEST( TaskManagerStopClearDeadlock )
     EXPECT_TRUE( true );
 
     tm.start();
-
     tm.join();
 
     EXPECT_GT( cnt, 1 );

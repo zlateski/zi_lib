@@ -29,7 +29,7 @@
 #  include <pthread.h>
 #
 #else
-#  include <zi/concurrency/pthread/mutex_tpl.hpp>
+#  include <zi/concurrency/pthread/mutex_types.hpp>
 #
 #endif
 

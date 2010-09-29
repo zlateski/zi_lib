@@ -100,7 +100,7 @@ ZiTEST( Test_RWMutex_LotsOfReaders )
             n = 1;
             m = 0;
 
-            for ( int i = 0; i < 10000; ++i )
+            for ( int i = 0; i < 200; ++i )
             {
                 zi::thread th( zi::run_fn( zi::bind( &read_fn, 1 ) ) );
                 th.start();
@@ -112,7 +112,7 @@ ZiTEST( Test_RWMutex_LotsOfReaders )
 
         {
             zi::rwmutex::write_guard wg( rwm );
-            EXPECT_EQ( m, 10000 );
+            EXPECT_EQ( m, 200 );
         }
     }
 }
