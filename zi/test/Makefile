@@ -4,7 +4,7 @@
 # Rules
 ########
 
-ALLTESTS = $(shell find ../  | grep -Z --color=never "_test\.cpp$$" | replace ".cpp" ".o" -- | replace "../" "./bin/" -- )
+ALLTESTS = $(shell find ..  | grep -Z --color=never "_test\.cpp$$" | sed 's/\.cpp/\.o/g' | sed 's/\.\.\//\.\/bin\//g' )
 
 $(BINDIR)/unit_tests: $(ALLTESTS) ./main.cpp
 	$(MKDIR) -p $(dir $@)
@@ -17,6 +17,6 @@ runtests: all
 	$(ECHO) "[RUN] running   $(BINDIR)/unit_tests"
 	$(BINDIR)/unit_tests
 
-ALLDEPS = $(shell find ../  | grep -Z --color=never "_test\.cpp$$" | replace ".cpp" ".d" -- | replace "../" "./bin/" -- )
+ALLDEPS = $(shell find ..  | grep -Z --color=never "_test\.cpp$$" | sed 's/\.cpp/\.d/g' | sed 's/\.\.\//\.\/bin\//g' )
 
 -include $(ALLDEPS)
