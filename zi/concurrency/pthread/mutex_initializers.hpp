@@ -22,6 +22,8 @@
 #include <zi/concurrency/config.hpp>
 #include <zi/concurrency/pthread/mutex_tags.hpp>
 
+#include <zi/utility/assert.hpp>
+
 #include <pthread.h>
 
 namespace zi {
@@ -56,12 +58,44 @@ template<> struct mutex_initializer< mutex_adaptive_tag >
 
 template<> struct mutex_initializer< mutex_recursive_tag >
 {
-    static void initialize( pthread_mutex_t &ptm)
+#if 0 && defined( PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP )
+    static void initialize( pthread_mutex_t &ptm )
     {
         static const pthread_mutex_t stored_initializer =
             PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
         ptm = stored_initializer;
     }
+#else
+
+    struct recursive_mutex_initializer_impl
+    {
+        pthread_mutexattr_t attr_;
+
+        recursive_mutex_initializer_impl()
+        {
+        ZI_VERIFY_0( pthread_mutexattr_init( &attr_ ) );
+        ZI_VERIFY_0( pthread_mutexattr_settype( &attr_, PTHREAD_MUTEX_RECURSIVE ) );
+
+
+        }
+
+        ~recursive_mutex_initializer_impl()
+        {
+            ZI_VERIFY_0( pthread_mutexattr_destroy( &attr_ ) );
+        }
+    };
+
+    static void initialize( pthread_mutex_t &ptm )
+    {
+        static recursive_mutex_initializer_impl impl;
+
+        ZI_VERIFY_0( pthread_mutex_init( &ptm, &impl.attr_ ) );
+
+    }
+
+#endif
+
+
 };
 
 
