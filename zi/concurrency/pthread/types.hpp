@@ -24,8 +24,8 @@
 namespace zi {
 namespace concurrency_ {
 
-typedef pthread_t thread_id_type      ;
-typedef pthread_t native_thread_handle;
+typedef pthread_t thread_id_type           ;
+typedef pthread_t native_thread_handle_type;
 
 
 } // namespace concurrency_

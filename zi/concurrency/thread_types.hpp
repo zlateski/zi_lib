@@ -39,8 +39,8 @@ namespace zi {
 namespace concurrency_ {
 
 
-typedef detail::thread_info< thread_id_type, native_thread_handle >      thread_info      ;
-typedef detail::all_threads_data< thread_id_type, native_thread_handle > all_threads_data ;
+typedef detail::thread_info< thread_id_type, native_thread_handle_type >      thread_info      ;
+typedef detail::all_threads_data< thread_id_type, native_thread_handle_type > all_threads_data ;
 
 
 namespace {
@@ -51,6 +51,10 @@ static all_threads_data &all_threads_info = singleton< all_threads_data >::insta
 
 
 } // namespace concurrency_
+
+using zi::concurrency_::thread_id_type;
+using zi::concurrency_::native_thread_handle_type;
+
 } // namespace zi
 
 #endif

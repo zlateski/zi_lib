@@ -25,8 +25,8 @@
 namespace zi {
 namespace concurrency_ {
 
-typedef win32::dword  thread_id_type      ;
-typedef win32::handle native_thread_handle;
+typedef win32::dword  thread_id_type           ;
+typedef win32::handle native_thread_handle_type;
 
 
 } // namespace concurrency_
