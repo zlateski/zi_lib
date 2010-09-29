@@ -20,11 +20,14 @@
 #define ZI_CONCURRENCY_PTHREAD_RWMUTEX_HPP 1
 
 #include <zi/concurrency/config.hpp>
+#include <zi/concurrency/mutex.hpp>
+#include <zi/concurrency/condition_variable.hpp>
 
 #include <zi/utility/non_copyable.hpp>
 #include <zi/utility/assert.hpp>
 
-#include <pthread.h>
+#include <zi/bits/cstdint.hpp>
+#include <zi/time/interval.hpp>
 
 namespace zi {
 namespace concurrency_ {
@@ -33,56 +36,132 @@ class rwmutex: non_copyable
 {
 private:
 
-    mutable pthread_rwlock_t m_;
+    mutable uint32_t reader_count_  ;
+    mutable bool     has_writer_    ;
+    mutable bool     writer_waiting_;
+
+    mutex              mutex_    ;
+    condition_variable reader_cv_;
+    condition_variable writer_cv_;
 
 public:
 
     rwmutex()
+        : reader_count_( 0 ),
+          has_writer_( false ),
+          writer_waiting_( false ),
+          mutex_(),
+          reader_cv_(),
+          writer_cv_()
     {
-        static const pthread_rwlock_t stored_initializer =
-            PTHREAD_RWLOCK_WRITER_NONRECURSIVE_INITIALIZER_NP;
-        m_ = stored_initializer;
-    }
-
-    ~rwmutex()
-    {
-        ZI_VERIFY_0( pthread_rwlock_destroy( &m_ ) );
     }
 
     inline bool try_acquire_read() const
     {
-        return ( 0 == pthread_rwlock_tryrdlock( &m_ ) );
-    }
+        mutex::guard g( mutex_ );
 
-    inline bool try_acquire_write() const
-    {
-        return ( 0 == pthread_rwlock_trywrlock( &m_ ) );
+        if ( has_writer_ || writer_waiting_ )
+        {
+            return false;
+        }
+
+        ++reader_count_;
+        return true;
     }
 
     inline void acquire_read() const
     {
-        ZI_VERIFY_0( pthread_rwlock_rdlock( &m_ ) );
+        mutex::guard g( mutex_ );
+
+        while ( has_writer_ || writer_waiting_ )
+        {
+            reader_cv_.wait( mutex_ );
+        }
+
+        ++reader_count_;
     }
 
-    inline void acquire_write() const
+    inline bool timed_acquire_read( int64_t ttl ) const
     {
-        ZI_VERIFY_0( pthread_rwlock_wrlock( &m_ ) );
+        mutex::guard g( mutex_ );
+
+        while ( has_writer_ || writer_waiting_ )
+        {
+            if ( !reader_cv_.timed_wait( mutex_, ttl ) )
+            {
+                return false;
+            }
+        }
+
+        ++reader_count_;
+        return true;
     }
 
-    inline void release() const
+    template< int64_t I >
+    inline bool timed_acquire_read( const interval::detail::interval_tpl< I > &ttl ) const
     {
-        ZI_VERIFY_0( pthread_rwlock_unlock( &m_ ) );
+        mutex::guard g( mutex_ );
+
+        while ( has_writer_ || writer_waiting_ )
+        {
+            if ( !reader_cv_.timed_wait( mutex_, ttl ) )
+            {
+                return false;
+            }
+        }
+
+        ++reader_count_;
+        return true;
     }
 
     inline void release_read() const
     {
-        ZI_VERIFY_0( pthread_rwlock_unlock( &m_ ) );
+        mutex::guard g( mutex_ );
+
+        if ( !--reader_count_ )
+        {
+            writer_waiting_ = false;
+            writer_cv_.notify_one();
+            reader_cv_.notify_all();
+        }
+    }
+
+
+    inline bool try_acquire_write() const
+    {
+        mutex::guard g( mutex_ );
+
+        if ( reader_count_ || has_writer_ )
+        {
+            return false;
+        }
+
+        has_writer_ = true;
+        return true;
+    }
+
+    inline void acquire_write() const
+    {
+        mutex::guard g( mutex_ );
+
+        while ( reader_count_ || has_writer_ )
+        {
+            writer_waiting_ = true;
+            writer_cv_.wait( mutex_ );
+        }
+
+        has_writer_ = true;
     }
 
     inline void release_write() const
     {
-        ZI_VERIFY_0( pthread_rwlock_unlock( &m_ ) );
+        mutex::guard g( mutex_ );
+        has_writer_ = writer_waiting_ = false;
+        writer_cv_.notify_one();
+        reader_cv_.notify_all();
     }
+
+    // todo: timed_acquire_write
 
     class read_guard
     {
