@@ -124,7 +124,7 @@ public:
     bool timed_wait( const mutex_tpl< MutexTag > &mutex,
                      const interval::detail::interval_tpl< I > &ttl ) const
     {
-        return wait_( mutex, ttl.msecs() );
+        return wait_( mutex, static_cast< win32::dword >( ttl.msecs() ) );
     }
 
     template< class Mutex, int64_t I >

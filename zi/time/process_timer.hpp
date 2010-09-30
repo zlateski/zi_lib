@@ -69,7 +69,7 @@ public:
     {
         int64_t last = lap_start_;
         lap_start_ = std::clock();
-        T ret( lap_start_ - last );
+        T ret( static_cast< T >( lap_start_ - last ) );
         ret /= static_cast< T >( CLOCKS_PER_SEC );
         return ret < 0 ? 0 : ret;
     }

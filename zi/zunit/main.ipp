@@ -25,6 +25,9 @@
 
 int main() {
     ZiRUN_ALL_TESTS();
+#if defined( ZI_OS_WINDOWS )
+    system( "pause" );
+#endif
 }
 
 #endif

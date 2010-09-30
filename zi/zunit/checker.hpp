@@ -74,8 +74,8 @@ public:
         std::string type_ ;                             \
     }
 
-ZUNIT_MAKE_UNARY_CHECKER(TRUE_checker ,  bool);
-ZUNIT_MAKE_UNARY_CHECKER(FALSE_checker, !bool);
+ZUNIT_MAKE_UNARY_CHECKER(TRUE_checker ,  0 != );
+ZUNIT_MAKE_UNARY_CHECKER(FALSE_checker,  0 == );
 
 #undef ZUNIT_MAKE_UNARY_CHECKER
 

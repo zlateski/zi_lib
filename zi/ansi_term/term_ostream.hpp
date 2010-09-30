@@ -24,7 +24,7 @@
 #include <zi/ansi_term/tags.hpp>
 #include <zi/ansi_term/flags.hpp>
 
-#include <stdint.h>
+#include <zi/bits/cstdint.hpp>
 #include <iostream>
 #include <iomanip>
 #include <queue>
@@ -171,7 +171,7 @@ public:
         return *this;
     }
 
-    template <typename T> friend class detail::formatter;
+    template <typename T> friend struct detail::formatter;
 
 };
 

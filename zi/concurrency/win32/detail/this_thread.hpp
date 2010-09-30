@@ -29,7 +29,7 @@ namespace this_thread {
 
 inline void usleep_nt( int64_t usec )
 {
-    Sleep( usec / 1000 + ( ( usec % 1000 > 500 ) ? 1 : 0 ) );
+    Sleep( static_cast< win32::dword >( usec / 1000 + ( ( usec % 1000 > 500 ) ? 1 : 0 ) ) );
 }
 
 inline win32::dword id()

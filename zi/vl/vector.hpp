@@ -29,6 +29,7 @@
 #include <cstddef>
 #include <ostream>
 #include <numeric>
+#include <cmath>
 
 #include <zi/vl/vl_prefix.hpp>
 

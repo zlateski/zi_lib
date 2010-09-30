@@ -22,7 +22,7 @@
 #include <zi/config/config.hpp>
 #include <zi/ansi_term/tags.hpp>
 
-#include <stdint.h>
+#include <zi/bits/cstdint.hpp>
 #include <iostream>
 
 namespace zi {
@@ -63,7 +63,7 @@ public:
 
     inline bool customized() const
     {
-        return value_;
+        return value_ != 0;
     }
 
     inline void set_color(uint16_t color)
@@ -160,7 +160,7 @@ public:
 
     inline bool dirty() const
     {
-        return value_ & DIRTY_MASK;
+        return ( value_ & DIRTY_MASK ) != 0;
     }
 
     inline void clear()

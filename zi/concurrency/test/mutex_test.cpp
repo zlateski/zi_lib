@@ -76,7 +76,7 @@ struct recursive_mutex_tester: zi::runnable
 
     void run()
     {
-        recursion( 10000 );
+        recursion( 4000 );
     }
 
     int   &v_;
@@ -157,7 +157,7 @@ ZiTEST( Test_RecursiveMutex )
         t1.join();
         t2.join();
 
-        EXPECT_EQ( v, 20000 );
+        EXPECT_EQ( v, 8000 );
     }
 
     {
@@ -169,7 +169,7 @@ ZiTEST( Test_RecursiveMutex )
         t1.join();
         t2.join();
 
-        EXPECT_EQ( v, 20000 );
+        EXPECT_EQ( v, 8000 );
     }
 
 }
