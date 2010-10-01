@@ -25,7 +25,7 @@
 namespace zi {
 namespace time_utils {
 
-#if defined( ZI_HAS_POSIX_SUPPORT )
+#if defined( ZI_HAS_POSIX_SUPPORT ) && !defined( ZI_OS_WINDOWS )
 
 inline void msec_to_ts( timespec& ts, int64_t t )
 {
