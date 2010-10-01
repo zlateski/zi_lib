@@ -63,8 +63,9 @@ private:
         {
             if ( camera_ )
             {
-                camera_->finish_operation_();
+                camera *c = camera_;
                 camera_ = 0;
+                c->finish_operation_();
             }
         }
     };
