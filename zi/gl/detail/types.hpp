@@ -26,7 +26,7 @@ typedef unsigned int    gl_enum    ;
 typedef unsigned char   gl_boolean ;
 typedef unsigned int    gl_bitfield;
 typedef void            gl_void    ;
-typedef signed char     gl_byte    ;
+typedef char            gl_byte    ;
 typedef short           gl_short   ;
 typedef int             gl_int     ;
 typedef unsigned char   gl_ubyte   ;

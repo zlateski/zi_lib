@@ -16,6 +16,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+//
+// link against glut and glu ( e.g. -lglut -lGLU )
+//
+
 #include <zi/gl/glut.hpp>
 #include <zi/gl/camera.hpp>
 

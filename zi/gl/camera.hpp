@@ -19,8 +19,8 @@
 #ifndef ZI_GL_CAMERA_HPP
 #define ZI_GL_CAMERA_HPP 1
 
+#include <zi/gl/gl.hpp>
 #include <zi/gl/glu.hpp>
-#include <zi/gl/glut.hpp>
 
 #include <zi/vl/vector.hpp>
 #include <zi/vl/matrix.hpp>
@@ -371,7 +371,7 @@ public:
 
         vl::mat4f m( rotation_ );
 
-        glMultMatrixf( m.transpose().data() );
+        glMultTransposeMatrixf( m.data() );
 
         glTranslatef( -center_.at( 0 ), -center_.at( 1 ), -center_.at( 2 ) );
     }

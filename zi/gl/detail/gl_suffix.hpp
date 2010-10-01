@@ -23,4 +23,8 @@
 
 #undef ZI_GLAPI_ENTRY
 
+#if defined( macintosh ) && PRAGMA_IMPORT_SUPPORTED
+#  pragma import off
+#endif
+
 #endif
