@@ -102,11 +102,7 @@ public:
 
     matrix( const T& v, const tags::eye_init_tag_type& )
     {
-        this->set( 0 );
-        for ( std::size_t i = 0; i < num_elements; i += S + 1 )
-        {
-            d_[ i ] = v;
-        }
+        this->to_eye( v );
     }
 
     template< class Y >
@@ -125,8 +121,15 @@ public:
         return vector< T, S, false >( d_ + S * i );
     }
 
-    inline vector< T, S, false >& row( std::size_t i ) { return this->operator[]( i ); }
-    inline const vector< T, S, false >& row( std::size_t i ) const { return this->operator[]( i ); }
+    inline vector< T, S, false > row( std::size_t i )
+    {
+        return vector< T, S, false >( d_ + S * i );
+    }
+
+    inline const vector< T, S, false > row( std::size_t i ) const
+    {
+        return vector< T, S, false >( const_cast< T* >( d_ + S * i ) );
+    }
 
     // todo: add cols
     //
@@ -267,9 +270,40 @@ public:
         return r;
     }
 
-    matrix_t& transpose();
-    template< class Y > matrix_t& transpose( const matrix< Y, S >& );
-    template< class Y > void transpose_to( matrix< Y, S >& ) const;
+    matrix_t& transpose()
+    {
+        for ( std::size_t row = 0; row < S; ++row )
+        {
+            for ( std::size_t col = 0; col < row; ++col )
+            {
+                std::swap( at( row, col ), at( col, row ) );
+            }
+        }
+        return *this;
+    }
+
+    template< class Y > matrix_t& transpose( const matrix< Y, S >& o )
+    {
+        if ( reinterpret_cast< const char* >( &o ) ==
+             const_cast< const char* >( reinterpret_cast< char* >( this ) ) )
+        {
+            return transpose();
+        }
+
+        for ( std::size_t row = 0; row < S; ++row )
+        {
+            for ( std::size_t col = 0; col < S; ++col )
+            {
+                at( row, col ) = o.at( col, row );
+            }
+        }
+        return *this;
+    }
+
+    template< class Y > void transpose_to( matrix< Y, S >& o ) const
+    {
+        o.transpose( *this );
+    }
 
     void set( const T& t )
     {
@@ -410,6 +444,44 @@ inline matrix< T, 3 > cross( const matrix< T, 3 >& x, const matrix< Y, 3 >& y )
         return os;
     }
 
+
+    matrix_t& to_eye( const T& v = static_cast< T >( 1 ) )
+    {
+        this->set( 0 );
+        for ( std::size_t i = 0; i < num_elements; i += S + 1 )
+        {
+            d_[ i ] = v;
+        }
+        return *this;
+    }
+
+    template< class Y, bool B >
+    matrix_t& make_rotation( const vector< Y, 3, B >& axis, T theta,
+                             ZI_VL_ENABLE_IF( S == 4, Y ) = 0 )
+    {
+        T s = static_cast< T >( std::sin( theta ) );
+        T c = static_cast< T >( std::cos( theta ) );
+
+        vector< T, 4 > v( axis, 0 );
+        v.normalize();
+
+        vector< T, 4 > r1( c, -v.at( 2 ) * s, v.at( 1 ) * s, 0);
+        r1 += v * v.at( 0 ) * ( T( 1 ) - c );
+
+        vector< T, 4 > r2( v.at( 2 ) * s, c, -v.at( 0 ) * s, 0);
+        r2 += v * v.at( 1 ) * ( T( 1 ) - c );
+
+        vector< T, 4 > r3( -v.at( 1 ) * s, v.at(  0 ) * s, c, 0 );
+        r3 += v * v.at( 2 ) * ( T( 1 ) - c );
+
+        d_[ 0 ] = r1.at( 0 ); d_[ 1 ] = r1.at( 1 ); d_[ 2 ] = r1.at( 2 ); d_[ 3 ] = r1.at( 3 );
+        d_[ 4 ] = r2.at( 0 ); d_[ 5 ] = r2.at( 1 ); d_[ 6 ] = r2.at( 2 ); d_[ 7 ] = r2.at( 3 );
+        d_[ 8 ] = r3.at( 0 ); d_[ 9 ] = r3.at( 1 ); d_[ 10 ] = r3.at( 2 ); d_[ 11 ] = r3.at( 3 );
+        d_[ 12 ] = d_[ 13 ] = d_[ 14 ] = 0;
+        d_[ 15 ] = 1;
+
+        return *this;
+    }
 
     static const matrix_t zero;
     static const matrix_t one;

@@ -29,7 +29,6 @@
 #include <cstddef>
 #include <ostream>
 #include <numeric>
-#include <cmath>
 
 #include <zi/vl/vl_prefix.hpp>
 
@@ -604,9 +603,10 @@ public:
         return r;
     }
 
-    template< class Y, bool B1, bool B2 > vector_t& normal( const vector< Y, S, B1 >& x,
-                                                            const vector< Y, S, B2 >& y,
-                                                            ZI_VL_ENABLE_IF( S == 3, Y ) = 0 )
+    template< class Y, class W, bool B1, bool B2 >
+    vector_t& normal( const vector< Y, S, B1 >& x,
+                      const vector< W, S, B2 >& y,
+                      ZI_VL_ENABLE_IF( S == 3, Y ) = 0 )
     {
         vector< T, S > z( x );
         z -= y;
@@ -616,14 +616,14 @@ public:
         return *this;
     }
 
-    template< class Y, bool B1, bool B2, bool B3 >
+    template< class Y, class W, class X, bool B1, bool B2, bool B3 >
     vector_t& normal( const vector< Y, S, B1 >& x,
-                      const vector< Y, S, B2 >& y,
-                      const vector< Y, S, B3 >& z,
+                      const vector< W, S, B2 >& y,
+                      const vector< X, S, B3 >& z,
                       ZI_VL_ENABLE_IF( S == 3, Y ) = 0 )
     {
         *this = x;
-        return this->template normal< Y, B2, B3 >( y, z );
+        return this->template normal< W, X, B2, B3 >( y, z );
     }
 
 
@@ -638,8 +638,8 @@ public:
         return *this;
     }
 
-    template< typename Y > void scale_to( const T& = T( -1 ), const T& = T( 1 ) );
-    template< typename Y > void scale_to( vector< Y, S >&, const T& = T( -1 ), const T& = T( 1 ) );
+    template< class Y > void scale_to( const T& = T( -1 ), const T& = T( 1 ) );
+    template< class Y > void scale_to( vector< Y, S >&, const T& = T( -1 ), const T& = T( 1 ) );
 
     static const vector< T, S, true > one;
     static const vector< T, S, true > zero;
@@ -726,7 +726,7 @@ inline vector< T, 3 > normal( const vector< T, 3, B1 >& x,
                               const vector< T, 3, B3 >& z )
 {
     vector< T, 3 > r( x );
-    r.template normal< T, B2, B3 >( y, z );
+    r.template normal< T, T, B2, B3 >( y, z );
     return r;
 }
 
@@ -735,6 +735,18 @@ const vector< T, S, true > vector< T, S, B >::one( 1 );
 
 template< class T, std::size_t S, bool B >
 const vector< T, S, true > vector< T, S, B >::zero( 0 );
+
+typedef vector< int, 2 > vec2i;
+typedef vector< int, 3 > vec3i;
+typedef vector< int, 4 > vec4i;
+
+typedef vector< float, 2 > vec2f;
+typedef vector< float, 3 > vec3f;
+typedef vector< float, 4 > vec4f;
+
+typedef vector< double, 2 > vec2d;
+typedef vector< double, 3 > vec3d;
+typedef vector< double, 4 > vec4d;
 
 
 } // namespace vl

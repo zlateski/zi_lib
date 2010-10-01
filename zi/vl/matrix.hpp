@@ -336,6 +336,19 @@ template< class T, std::size_t S >
 const matrix< T, S > matrix< T, S >::identity( tags::eye_init_tag );
 */
 
+typedef matrix< int, 2 > mat2i;
+typedef matrix< int, 3 > mat3i;
+typedef matrix< int, 4 > mat4i;
+
+typedef matrix< float, 2 > mat2f;
+typedef matrix< float, 3 > mat3f;
+typedef matrix< float, 4 > mat4f;
+
+typedef matrix< double, 2 > mat2d;
+typedef matrix< double, 3 > mat3d;
+typedef matrix< double, 4 > mat4d;
+
+
 } // namespace vl
 } // namespace zi
 
