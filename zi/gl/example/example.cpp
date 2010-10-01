@@ -17,11 +17,26 @@
 //
 
 #include <zi/gl/glut.hpp>
+#include <zi/gl/camera.hpp>
 
-#include <iostream>
-#include <cstdlib>  // for exit( 0 )
+#include <cstdlib>
 
 bool is_wire = false;
+zi::gl::camera camera;
+
+void reshape_func( int w, int h )
+{
+    camera.dimensions( w, h );
+
+    camera.viewport( 0, 0, w, h );
+    camera.apply_viewport();
+
+    zi::gl::glMatrixMode( zi::gl::projection );
+    zi::gl::glLoadIdentity();
+
+    camera.perspective( 50 );
+    camera.apply_perspective();
+}
 
 void keyboard_func( unsigned char key, int x, int y )
 {
@@ -45,8 +60,10 @@ void draw_scene(void)
     zi::gl::glMatrixMode( zi::gl::modelview );
     zi::gl::glLoadIdentity();
 
+    camera.apply_modelview();
+
     float lt_diff[] = { 1.0, 1.0, 1.0, 1.0 };
-    float lt_pos[]  = { -3.0, -3.0, -5.0, 1.0 };
+    float lt_pos[]  = { -130.0, -130.0, 150.0, 1.0 };
 
     zi::gl::glLightfv(zi::gl::light0, zi::gl::diffuse,  lt_diff );
     zi::gl::glLightfv(zi::gl::light0, zi::gl::position, lt_pos  );
@@ -74,11 +91,11 @@ void draw_scene(void)
 
     if ( is_wire )
     {
-        zi::gl::glutWireTeapot( 0.3 );
+        zi::gl::glutWireTeapot( 20.0 );
     }
     else
     {
-        zi::gl::glutSolidTeapot( 0.3 );
+        zi::gl::glutSolidTeapot( 20.0 );
     }
 
 
@@ -88,9 +105,45 @@ void draw_scene(void)
 
 void timer_func( int t )
 {
-    zi::gl::glutPostRedisplay();
+    // zi::gl::glutPostRedisplay();
     zi::gl::glutTimerFunc(t, timer_func, t);
 }
+
+void mouse_func( int button, int state, int x, int y )
+{
+    if ( state == zi::glut::down )
+    {
+        switch ( button )
+        {
+        case zi::glut::left_button:
+            camera.start_translation( x, y );
+            break;
+
+        case zi::glut::middle_button:
+            camera.start_zoom( x, y );
+            break;
+
+        case zi::glut::right_button:
+            camera.start_rotation( x, y );
+            break;
+
+        }
+    }
+    else
+    {
+        camera.finish_operation( x, y );
+        zi::gl::glutPostRedisplay();
+    }
+
+}
+
+void motion_func( int x, int y )
+{
+    camera.update_operation( x, y );
+    camera.apply_modelview();
+    zi::gl::glutPostRedisplay();
+}
+
 
 
 int main( int argc, char* argv[] ) {
@@ -104,9 +157,21 @@ int main( int argc, char* argv[] ) {
     zi::gl::glutInitWindowSize( 600, 600 );
     zi::gl::glutCreateWindow("Test zi/gl/glut.hpp");
 
+    zi::gl::glutReshapeFunc( reshape_func );
     zi::gl::glutDisplayFunc( draw_scene );
+
+    camera.dimensions( 600, 600 );
+    camera.distance( 150 );
+    camera.center( 0, 0, 0 );
+    camera.viewport( 0, 0, 600, 600 );
+    camera.perspective( 50 );
+
     zi::gl::glutTimerFunc( 10, timer_func, 10 );
     zi::gl::glutKeyboardFunc( keyboard_func );
+    zi::gl::glutMouseFunc( mouse_func );
+    zi::gl::glutMotionFunc( motion_func );
+
+
     zi::gl::glutMainLoop();
 
 }

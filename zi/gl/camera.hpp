@@ -189,8 +189,6 @@ private:
                                      2.0 * std::acos( dp ) );
             rotation_ *= r;
 
-            std::cout << r << "\n";
-
         }
         else
         {
