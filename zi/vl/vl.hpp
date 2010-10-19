@@ -16,13 +16,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ZI_VL_VL_PREFIX
-#define ZI_VL_VL_PREFIX 1
+#ifndef ZI_VL_VL_HPP
+#define ZI_VL_VL_HPP 1
 
-#define ZI_VL_ENABLE_IF( cond, tp )                           \
-    typename ::zi::enable_if< ( cond ), tp >::type*
-
-#define ZI_VL_DISABLE_IF( cond, tp )                          \
-    typename ::zi::disable_if< ( cond ), tp >::type*
+#include <zi/vl/vec.hpp>
+#include <zi/vl/mat.hpp>
+#include <zi/vl/quat.hpp>
 
 #endif
+
