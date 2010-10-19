@@ -19,6 +19,7 @@
 #ifndef ZI_HEAP_BINARY_HEAP_HPP
 #define ZI_HEAP_BINARY_HEAP_HPP
 
+#include <zi/bits/cstdint.hpp>
 #include <zi/bits/hash.hpp>
 #include <zi/bits/unordered_map.hpp>
 #include <zi/utility/exception.hpp>
@@ -52,9 +53,9 @@ template< class KeyExtractor,
         >
 struct hashed_index
 {
-    typedef typename KeyExtractor::result_type                        key_type;
-    typedef KeyExtractor                                              key_extractor;
-    typedef unordered_map< const key_type, std::size_t, Hash, Pred >  container_type;
+    typedef typename KeyExtractor::result_type                     key_type;
+    typedef KeyExtractor                                           key_extractor;
+    typedef unordered_map< const key_type, uint32_t, Hash, Pred >  container_type;
 };
 
 template< class KeyExtractor,
@@ -62,9 +63,9 @@ template< class KeyExtractor,
         >
 struct ordered_index
 {
-    typedef typename KeyExtractor::result_type                key_type;
-    typedef KeyExtractor                                      key_extractor;
-    typedef std::map< const key_type, std::size_t, Compare >  container_type;
+    typedef typename KeyExtractor::result_type             key_type;
+    typedef KeyExtractor                                   key_extractor;
+    typedef std::map< const key_type, uint32_t, Compare >  container_type;
 };
 
 template< class ValueExtractor,

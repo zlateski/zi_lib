@@ -24,20 +24,17 @@
 
 namespace zi {
 
-template< bool Condition, class Message = void > struct STATIC_ASSERT_FAILED;
+template< bool Condition > struct STATIC_ASSERT_FAILED;
 
-template< class Message > struct STATIC_ASSERT_FAILED< true, Message > { };
+template<> struct STATIC_ASSERT_FAILED< true > { static const bool value = true; };
 
 template< int I > struct static_assert_test { };
 
 #define ZI_STATIC_ASSERT( value, message )                              \
                                                                         \
-    struct ZiPP_GLUE( message##_at_line_, __LINE__ );                   \
     typedef ::zi::static_assert_test                                    \
-    < sizeof( ::zi::STATIC_ASSERT_FAILED< (bool)( value ),              \
-              ZiPP_GLUE( message##_at_line_, __LINE__ ) > )             \
-      >                                                                 \
-    ZiPP_GLUE( _static_assert_test_at_line_, __LINE__)
+    < sizeof( ::zi::STATIC_ASSERT_FAILED< (bool)( value ) > ) >         \
+    ZiPP_GLUE( message##_at_line_, __LINE__ )
 
 } // namespace zi
 

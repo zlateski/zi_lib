@@ -163,9 +163,32 @@ ZiTEST( Custom_Struct_Heap_Tests )
 
     for ( int i = 0; i < 100000; ++i )
     {
+        EXPECT_EQ( h.size(), static_cast< std::size_t >( 100000 - i ) );
+        EXPECT_EQ( h.top().v_, static_cast< std::size_t >( 100000 - i - 1 ) );
+        h.pop();
+    }
+
+    for ( int i = 0; i < 100000; ++i )
+    {
+        h.insert( custom_heapable( i ) );
+    }
+
+    for ( std::size_t i = 0; i < 100000; ++i )
+    {
         EXPECT_EQ( h.size(), 100000 - i );
         EXPECT_EQ( h.top().v_, 100000 - i - 1 );
         h.pop();
+    }
+
+    for ( int i = 0; i < 100000; ++i )
+    {
+        h.insert( custom_heapable( i ) );
+    }
+
+    for ( int i = 0; i < 100000; ++i )
+    {
+        EXPECT_EQ( h.size(), static_cast< std::size_t >( 100000 - i ) );
+        h.erase_key( ( i + 88888 ) % 100000 );
     }
 
 }

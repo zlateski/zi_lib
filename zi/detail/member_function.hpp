@@ -35,7 +35,7 @@ struct member_function
     typedef typename remove_reference< Return >::type result_type;
 
     template< class PtrToType >
-    typename disable_if<
+    inline typename disable_if<
         is_convertible< PtrToType&, Type& >::type::value,
         Return
     >::type
@@ -44,12 +44,12 @@ struct member_function
         return this->operator() ( *ptr );
     }
 
-    Return operator() ( Type& v ) const
+    inline Return operator() ( Type& v ) const
     {
         return (v.*MemberFunctionPtr)();
     }
 
-    Return operator() ( const reference_wrapper< Type >& v_ref )
+    inline Return operator() ( const reference_wrapper< Type >& v_ref )
     {
         return this->operator() ( v_ref.get() );
     }
@@ -65,7 +65,7 @@ struct const_member_function
     typedef typename remove_reference< Return >::type result_type;
 
     template< class PtrToType >
-    typename disable_if<
+    inline typename disable_if<
         is_convertible< const PtrToType&, const Type& >::type::value,
         Return
     >::type
@@ -74,17 +74,17 @@ struct const_member_function
         return this->operator() ( *ptr );
     }
 
-    Return operator() ( const Type& v ) const
+    inline Return operator() ( const Type& v ) const
     {
         return (v.*MemberFunctionPtr)();
     }
 
-    Return operator() ( const reference_wrapper< Type >& v_ref ) const
+    inline Return operator() ( const reference_wrapper< Type >& v_ref ) const
     {
         return this->operator() ( v_ref.get() );
     }
 
-    Return operator() ( const reference_wrapper< const Type >& v_ref ) const
+    inline Return operator() ( const reference_wrapper< const Type >& v_ref ) const
     {
         return this->operator() ( v_ref.get() );
     }

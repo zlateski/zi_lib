@@ -38,7 +38,7 @@ struct non_const_member
     typedef Result result_type;
 
     template< class PtrToType >
-    typename disable_if<
+    inline typename disable_if<
         is_convertible< const PtrToType&, const Type& >::type::value, Result&
     >::type
     operator() ( const PtrToType& ptr ) const
@@ -46,22 +46,22 @@ struct non_const_member
         return this->operator() ( *ptr );
     }
 
-    Result& operator() ( Type& v ) const
+    inline Result& operator() ( Type& v ) const
     {
         return v.*MemberVariablePtr;
     }
 
-    const Result& operator() ( const Type& v, void* = 0 ) const
+    inline const Result& operator() ( const Type& v, void* = 0 ) const
     {
         return v.*MemberVariablePtr;
     }
 
-    Result& operator() ( const reference_wrapper< Type >& v_ref )
+    inline Result& operator() ( const reference_wrapper< Type >& v_ref )
     {
         return this->operator() ( v_ref.get() );
     }
 
-    const Result& operator() ( const reference_wrapper< const Type >& v_ref )
+    inline const Result& operator() ( const reference_wrapper< const Type >& v_ref )
     {
         return this->operator() ( v_ref.get() );
     }
@@ -77,7 +77,7 @@ struct const_member
     typedef Result result_type;
 
     template< class PtrToType >
-    typename disable_if<
+    inline typename disable_if<
         is_convertible< const PtrToType&, const Type& >::type::value, Result&
     >::type
     operator() ( const PtrToType& ptr ) const
@@ -85,17 +85,17 @@ struct const_member
         return this->operator() ( *ptr );
     }
 
-    Result& operator() ( const Type& v ) const
+    inline Result& operator() ( const Type& v ) const
     {
         return v.*MemberVariablePtr;
     }
 
-    Result& operator() ( const reference_wrapper< const Type >& v_ref ) const
+    inline Result& operator() ( const reference_wrapper< const Type >& v_ref ) const
     {
         return this->operator() ( v_ref.get() );
     }
 
-    Result& operator() ( const reference_wrapper< Type >& v_ref, void* = 0 ) const
+    inline Result& operator() ( const reference_wrapper< Type >& v_ref, void* = 0 ) const
     {
         return this->operator() ( v_ref.get() );
     }

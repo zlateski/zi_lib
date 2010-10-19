@@ -21,10 +21,18 @@
 
 #include <zi/bits/ref.hpp>
 #include <zi/utility/exception.hpp>
+#include <zi/utility/assert.hpp>
+#include <zi/utility/for_each.hpp>
 
 #include <cstddef>
+#include <cstdlib>
+#include <cstring>
 #include <vector>
 #include <functional>
+#include <utility>
+#include <algorithm>
+
+#include <iostream>
 
 namespace zi {
 namespace heap {
@@ -42,65 +50,211 @@ template< class Type,
 class binary_heap_impl
 {
 private:
+
+    std::size_t          size_           ;
+    std::size_t          reserved_       ;
     KeyExtractor         key_extractor_  ;
     ValueExtractor       value_extractor_;
     ValueCompare         compare_        ;
-    Allocator            allocator_      ;
 
-    std::vector< Type* > heap_           ;
-    Container            container_      ;
+    Allocator            alloc_   ;
+    Container            keymap_  ;
+    uint32_t*            heap_    ;
+    uint32_t*            map_     ;
+    Type*                store_   ;
+
+private:
+
+    inline void try_grow()
+    {
+        if ( size_ == reserved_ )
+        {
+            const std::size_t s = reserved_ << 1;
+
+            Type* new_store = alloc_.allocate( s );
+
+            for ( uint32_t i = 0; i < size_; ++i )
+            {
+                alloc_.construct( new_store + heap_[ i ], store_[ heap_[ i ] ] );
+                alloc_.destroy( store_ + heap_[ i ] );
+            }
+
+            alloc_.deallocate( store_, reserved_ );
+
+            store_ = new_store;
+
+            uint32_t* nheap = new uint32_t[ s ];
+            std::copy( heap_, heap_ + reserved_, nheap );
+            delete [] heap_;
+            heap_ = nheap;
+
+            uint32_t* nmap = new uint32_t[ s ];
+            std::copy( map_, map_ + reserved_, nmap );
+            delete [] map_;
+            map_ = nmap;
+
+            for ( uint32_t i = static_cast< uint32_t >( reserved_ ); i < s; ++i )
+            {
+                heap_[ i ] = map_[ i ] = i;
+            }
+
+            reserved_ = s;
+        }
+
+        ZI_ASSERT( size_ < reserved_ );
+    }
+
+    inline void try_shrink()
+    {
+        if ( ( ( size_ << 2 ) < reserved_ ) && ( reserved_ > 128 ) )
+        {
+            ZI_ASSERT( size_ == keymap_.size() );
+
+            std::size_t s = reserved_ >> 1;
+
+            Type* old = store_;
+
+            store_ = alloc_.allocate( s );
+
+            uint32_t si = 0;
+
+            for ( uint32_t i = 0; i < size_; ++i )
+            {
+                if ( heap_[ i ] >= s )
+                {
+                    while ( map_[ si ] < s )
+                    {
+                        ++si;
+                    }
+
+                    keymap_[ key_extractor_( old[ heap_[ i ] ] ) ] = si;
+                    alloc_.construct( store_ + si, old[ heap_[ i ] ] );
+                    alloc_.destroy( old + heap_[ i ] );
+
+                    heap_[ i ] = si;
+                    map_[ si ] = i;
+                }
+                else // heap_[ i ] < s
+                {
+                    alloc_.construct( store_ + heap_[ i ], old[ heap_[ i ] ] );
+                    alloc_.destroy( old + heap_[ i ] );
+                }
+
+            }
+
+            for ( uint32_t i = size_; i < s; ++i )
+            {
+                if ( heap_[ i ] >= s )
+                {
+                    while ( map_[ si ] < s )
+                    {
+                        ++si;
+                    }
+                    heap_[ i ] = si;
+                    map_[ si ] = i;
+                }
+            }
+
+            alloc_.deallocate( old, reserved_ );
+
+            uint32_t* nheap = new uint32_t[ s ];
+            std::copy( heap_, heap_ + s, nheap );
+            delete [] heap_;
+            heap_ = nheap;
+
+            uint32_t* nmap = new uint32_t[ s ];
+            std::copy( map_, map_ + s, nmap );
+            delete [] map_;
+            map_ = nmap;
+
+            reserved_ = s;
+        }
+
+        ZI_ASSERT( size_ < reserved_ );
+    }
 
 public:
     binary_heap_impl( const ValueCompare& compare   = ValueCompare(),
-                      const Allocator   & allocator = Allocator() )
-        : key_extractor_(),
+                      const Allocator   & allocator = Allocator(),
+                      std::size_t init_reserved = 16 )
+        : size_( 0 ),
+          reserved_( init_reserved ),
+          key_extractor_(),
           value_extractor_(),
           compare_( compare ),
-          allocator_( allocator ),
-          heap_(),
-          container_()
+          alloc_( allocator ),
+          keymap_(),
+          heap_( 0 ),
+          map_( 0 ),
+          store_( 0 )
     {
+        if ( reserved_ < 16 )
+        {
+            reserved_ = 16;
+        }
+        heap_ = new uint32_t[ reserved_ ];
+        map_  = new uint32_t[ reserved_ ];
+        store_ = alloc_.allocate( reserved_ );
+
+        for ( uint32_t i = 0; i < reserved_; ++i )
+        {
+            heap_[ i ] = map_[ i ] = i;
+        }
     }
 
-    std::size_t size() const
+    ~binary_heap_impl()
     {
-        return heap_.size();
+        for ( uint32_t i = 0; i < size_; ++i )
+        {
+            alloc_.destroy( store_ + heap_[ i ] );
+        }
+
+        alloc_.deallocate( store_, reserved_ );
+
+        delete [] heap_;
+        delete [] map_ ;
+
     }
 
-    bool empty() const
+    inline std::size_t size() const
     {
-        return heap_.empty();
+        return size_;
     }
 
-    std::size_t count( const Type& v ) const
+    inline bool empty() const
     {
-        return container_.count( key_extractor_( const_cast< Type& >( v ) ) );
+        return size_ == 0;
     }
 
-    std::size_t key_count( const KeyType& v ) const
+    inline std::size_t count( const Type& v ) const
     {
-        return container_.count( v );
+        return keymap_.count( key_extractor_( const_cast< Type& >( v ) ) );
     }
 
-    const Type& top() const
+    inline std::size_t key_count( const KeyType& v ) const
     {
-        if ( heap_.size() == 0 )
+        return keymap_.count( v );
+    }
+
+    inline const Type& top() const
+    {
+        if ( size_ == 0 )
         {
             throw ::zi::exception( "called pop on an empty heap" );
         }
-        return *heap_.front();
+        return store_[ heap_[ 0 ] ];
     }
 
-    Type& top()
+    inline Type& top()
     {
-        if ( heap_.size() == 0 )
+        if ( size_ == 0 )
         {
             throw ::zi::exception( "called pop on an empty heap" );
         }
-        return *heap_.front();
+        return store_[ heap_[ 0 ] ];
     }
 
-    void insert( const Type& v )
+    inline void insert( const Type& v )
     {
         if ( !count( v ) )
         {
@@ -108,7 +262,7 @@ public:
         }
     }
 
-    std::size_t erase( const Type& v )
+    inline std::size_t erase( const Type& v )
     {
         if ( count( v ) )
         {
@@ -118,39 +272,44 @@ public:
         return 0;
     }
 
-    std::size_t erase_key( const KeyType& v )
+    inline std::size_t erase_key( const KeyType& v )
     {
         if ( key_count( v ) )
         {
-            erase_( *heap_[ container_[ v ] ] );
+            erase_key_( v );
             return 1;
         }
         return 0;
     }
 
-    void pop()
+    inline void pop()
     {
-        if ( heap_.size() > 0 )
+        if ( size_ > 0 )
         {
-            erase_( *heap_.front() );
+            erase_( store_[ heap_[ 0 ] ] );
         }
+    }
+
+    inline void clear()
+    {
+        clear_();
     }
 
 
 private:
 
-    void swap_elements( std::size_t x, std::size_t y )
+    inline void swap_elements( uint32_t x, uint32_t y )
     {
         std::swap( heap_[ x ], heap_[ y ] );
-        container_[ key_extractor_( heap_[ x ] ) ] = x;
-        container_[ key_extractor_( heap_[ y ] ) ] = y;
+        map_[ heap_[ x ] ] = x;
+        map_[ heap_[ y ] ] = y;
     }
 
-    void heap_up( std::size_t index )
+    inline void heap_up( uint32_t index )
     {
-        std::size_t parent = ( index - 1 ) / 2;
-        while ( index > 0 && compare_( value_extractor_( heap_[ index ] ),
-                                       value_extractor_( heap_[ parent ] ) ) )
+        uint32_t parent = ( index - 1 ) / 2;
+        while ( index > 0 && compare_( value_extractor_( store_[ heap_[ index  ] ] ),
+                                       value_extractor_( store_[ heap_[ parent ] ] )))
         {
             swap_elements( index, parent );
             index = parent;
@@ -158,63 +317,101 @@ private:
         }
     }
 
-    void heap_down( std::size_t index )
+    inline void heap_down( uint32_t index )
     {
-        std::size_t child = index * 2 + 1;
-        while ( child < heap_.size() )
+        uint32_t child = index * 2 + 1;
+        while ( child < size_ )
         {
-            if ( child + 1 < heap_.size() &&
-                 compare_( value_extractor_( heap_[ child + 1 ] ),
-                           value_extractor_( heap_[ child ] ) ) )
+            if ( child + 1 < size_ &&
+                 compare_( value_extractor_( store_[ heap_[ child + 1 ] ] ),
+                           value_extractor_( store_[ heap_[ child ] ] )))
             {
                 ++child;
             }
 
-            if ( compare_( value_extractor_( heap_[ index ] ),
-                           value_extractor_( heap_[ child ] ) ) )
+            if ( compare_( value_extractor_( store_[ heap_[ index ] ] ),
+                           value_extractor_( store_[ heap_[ child ] ] )))
             {
                 break;
             }
 
             swap_elements( index, child );
             index = child;
-            child = index * 2 + 1;
+            child = ( index << 1 ) + 1;
         }
     }
 
-    void insert_( const Type& v )
+    inline void insert_( const Type& v )
     {
-        Type *ptr = allocator_.allocate( 1 );
-        allocator_.construct( ptr, v );
+        ZI_ASSERT( heap_[ size_ ] < reserved_ );
 
-        container_.insert( std::make_pair( key_extractor_( ptr ), heap_.size() ) );
-        heap_.push_back( ptr );
+        alloc_.construct( store_ + heap_[ size_ ], v );
 
-        heap_up( heap_.size() - 1 );
+        keymap_.insert( std::make_pair( key_extractor_( const_cast< Type& >( v ) ),
+                                        heap_[ size_ ] ));
+
+        ZI_ASSERT( map_[ heap_[ size_ ] ] == size_ );
+
+        heap_up( static_cast< uint32_t >( size_ ) );
+
+        ++size_;
+        try_grow();
     }
 
-    void erase_tail_()
+    inline void clear_()
     {
-        container_.erase( key_extractor_( heap_.back() ) );
-        allocator_.destroy( heap_.back() );
-        allocator_.deallocate( heap_.back(), 1 );
-        heap_.pop_back();
-    }
-
-    void erase_( const Type& v )
-    {
-        std::size_t pos = container_[ key_extractor_( const_cast< Type&> ( v ) ) ];
-
-        if ( pos + 1 == heap_.size() )
+        for ( uint32_t i = 0; i < size_; ++i )
         {
-            erase_tail_();
+            alloc_.destroy( store_ + heap_[ i ] );
         }
-        else
+
+        if ( reserved_ > 16 )
         {
-            swap_elements( pos, heap_.size() - 1 );
-            erase_tail_();
-            heap_down( pos );
+
+            alloc_.deallocate( store_ + 16, reserved_ - 16 );
+
+            delete [] heap_;
+            delete [] map_ ;
+
+            heap_ = new uint32_t[ 16 ];
+            map_  = new uint32_t[ 16 ];
+
+            reserved_ = 16;
+
+            for ( uint32_t i = 0; i < reserved_; ++i )
+            {
+                heap_[ i ] = map_[ i ] = i;
+            }
         }
+
+        size_ = 0;
+        keymap_.clear();
+    }
+
+    inline void erase_( const Type& v )
+    {
+        erase_at_( keymap_[ key_extractor_( const_cast< Type& > ( v ) ) ] );
+    }
+
+    inline void erase_key_( const KeyType& k )
+    {
+        erase_at_( keymap_[ k ] );
+    }
+
+    inline void erase_at_( const uint32_t pos )
+    {
+        ZI_VERIFY( keymap_.erase( key_extractor_( store_[ pos ] )));
+
+        alloc_.destroy( store_ + pos );
+        --size_;
+
+        if ( map_[ pos ] < size_ )
+        {
+            const uint32_t hp = map_[ pos ];
+            swap_elements( map_[ pos ], size_ );
+            heap_down( hp );
+        }
+        try_shrink();
     }
 
 };

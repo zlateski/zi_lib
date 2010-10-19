@@ -38,6 +38,7 @@ struct non_ref
     typedef typename remove_reference< Result >::type result_type;
 
     template< class PtrToType >
+    inline
     typename disable_if<
         is_convertible<
             const PtrToType&,
@@ -50,17 +51,17 @@ struct non_ref
         return this->operator() ( *ptr );
     }
 
-    Result operator() ( const Type& v ) const
+    inline Result operator() ( const Type& v ) const
     {
         return StaticFunctionPtr( v );
     }
 
-    Result operator() ( const reference_wrapper< const Type >& v_ref ) const
+    inline Result operator() ( const reference_wrapper< const Type >& v_ref ) const
     {
         return this->operator() ( v_ref.get() );
     }
 
-    Result operator() ( const reference_wrapper<
+    inline Result operator() ( const reference_wrapper<
                             typename remove_const< Type >::type
                         >& v_ref, void* = 0 ) const
     {
@@ -78,6 +79,7 @@ struct non_const_ref
     typedef typename remove_reference< Result >::type result_type;
 
     template< class PtrToType >
+    inline
     typename disable_if<
         is_convertible<
             PtrToType&,
@@ -90,12 +92,12 @@ struct non_const_ref
         return this->operator() ( *ptr );
     }
 
-    Result operator() ( Type v ) const
+    inline Result operator() ( Type v ) const
     {
         return StaticFunctionPtr( v );
     }
 
-    Result operator() ( const reference_wrapper<
+    inline Result operator() ( const reference_wrapper<
                             typename remove_reference< Type >::type
                         >& v_ref) const
     {
@@ -114,6 +116,7 @@ struct const_ref
     typedef typename remove_reference< Result >::type result_type;
 
     template< class PtrToType >
+    inline
     typename disable_if<
         is_convertible<
             const PtrToType&,
@@ -126,19 +129,19 @@ struct const_ref
         return this->operator() ( *ptr );
     }
 
-    Result operator() ( Type v ) const
+    inline Result operator() ( Type v ) const
     {
         return StaticFunctionPtr( v );
     }
 
-    Result operator() ( const reference_wrapper<
+    inline Result operator() ( const reference_wrapper<
                             typename remove_reference< Type >::type
                         >& v_ref ) const
     {
         return this->operator() ( v_ref.get() );
     }
 
-    Result operator() ( const reference_wrapper<
+    inline Result operator() ( const reference_wrapper<
                             typename remove_const<
                                 typename remove_reference< Type >::type
                             >::type
