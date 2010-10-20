@@ -135,7 +135,7 @@ private:
 
     inline bool check_compactness( const uint64_t e, const vl::vec< Float, 3 >& p ) const
     {
-        const Float min_compactness = 0.002;
+        const Float min_compactness = 0.1;
 
         const uint32_t v0 = detail::edge_source( e );
         const uint32_t v1 = detail::edge_sink( e );
@@ -426,13 +426,17 @@ public:
         return heap_.size();
     }
 
-    inline std::size_t optimize( std::size_t target_faces, Float max_error )
+    inline std::size_t optimize( std::size_t target_faces,
+                                 Float max_error,
+                                 Float min_error = std::numeric_limits< Float >::epsilon() * 25 )
     {
 
         std::size_t bad = 0;
-        while ( mesh_.face_count() > target_faces )
+        while ( heap_.size() )
         {
-            if ( ( heap_.size() == 0 ) || ( heap_.top().value_ > max_error ) )
+            if ( ( ( mesh_.face_count() <= target_faces ) &&
+                   ( heap_.top().value_ >= min_error ) ) ||
+                 ( heap_.top().value_ > max_error ) )
             {
                 break;
             }
@@ -540,25 +544,61 @@ private:
         }
 
         uint32_t v = mesh_.collapse_edge( v0, v1 );
-        points_[ v ] = e.optimal_;
+
+        //Float errv0 = std::sqrt( quadratic_[ v0 ].evaluate( e.optimal_ ) );
+        //Float errv1 = std::sqrt( quadratic_[ v1 ].evaluate( e.optimal_ ) );
+
+        //static const Float sqrt_epsilon =
+        //std::sqrt( std::numeric_limits< Float >::epsilon() );
+
+
 
         Float errv0 = quadratic_[ v0 ].evaluate( e.optimal_ );
         Float errv1 = quadratic_[ v1 ].evaluate( e.optimal_ );
 
+        static const Float sqrt_epsilon =
+            std::numeric_limits< Float >::epsilon();
+
+
         Float err = errv0 + errv1;
 
-        //if ( err > std::numeric_limits< Float >::epsilon() )
-        //{
-        //errv0 /= err;
-        //normals_[ v ] = normals_[ v1 ] * errv0 +
-        //( static_cast< Float >( 1 ) - errv0 ) * normals_[ v0 ];
-        //normals_[ v ] *= 2;
-        //}
-        //else
-            //{
-        normals_[ v ] = normals_[ v0 ] + normals_[ v1 ];
-            //}
+        if ( ( errv0 < sqrt_epsilon ) &&
+             ( errv1 < sqrt_epsilon ) )
+        {
+            normals_[ v ] = norm( normals_[ v1 ] + normals_[ v0 ] );
+        }
+        else
+        {
+            if ( errv0 < sqrt_epsilon )
+            {
+                normals_[ v ] = normals_[ v0 ];
+            }
+            else
+            {
+                if ( errv1 < sqrt_epsilon )
+                {
+                    normals_[ v ] = normals_[ v1 ];
+                }
+                else
+                {
+                    errv1 /= err;
+                    normals_[ v ] = norm( slerp( normals_[ v1 ], normals_[ v0 ], errv1 ) );
+                }
+            }
+            //normals_[ v ] = normals_[ v0 ] + normals_[ v1 ];
+        }
 
+
+
+        //vl::vec< Float, 3 > vx = points_[ v1 ];
+        //vx += points_[ v1 ] * ( dot( points_[ v0 ] - points_[ v1 ],
+        //                           norm( normals_[ v1 ] ) ) );
+
+        //std::cout << dot( points_[ v1 ] - vx, normals_[ v0
+
+        //normals_[ v ] = norm( normals_[ v0 ] + normals_[ v1 ] );
+
+        points_[ v ] = e.optimal_;
 
         quadratic_[ v ] += ( v == v0 ) ? quadratic_[ v1 ] : quadratic_[ v0 ];
 
@@ -632,10 +672,14 @@ private:
             vl::vec< Float, 3 > &v1 = points_[ it->v1() ];
             vl::vec< Float, 3 > &v2 = points_[ it->v2() ];
 
-            vl::vec< Float, 3 > n( norm( cross( v1 - v0, v2 - v0 ) ));
-            normals_[ it->v0() ] += n;
-            normals_[ it->v1() ] += n;
-            normals_[ it->v2() ] += n;
+            vl::vec< Float, 3 > center( v0 + v1 + v2 );
+            center /= 3;
+
+            vl::vec< Float, 3 > n( norm( cross( v1 - v0, v2 - v0 ) ) );
+            //n = norm( n ); // / n_len;
+            normals_[ it->v0() ] += n / len( points_[ it->v0() ] - center );
+            normals_[ it->v1() ] += n / len( points_[ it->v1() ] - center );
+            normals_[ it->v2() ] += n / len( points_[ it->v2() ] - center );
 
             ++counts[ it->v0() ];
             ++counts[ it->v1() ];
@@ -647,6 +691,7 @@ private:
             if ( counts[ i ] > 0 )
             {
                 //normals_[ i ] /= static_cast< Float >( counts[ i ] );
+                normalize( normals_[ i ] );
             }
         }
     }
@@ -709,7 +754,13 @@ private:
         std::cout << oss.str() << std::flush ;
 */
 
-        heap_.insert( heap_entry( e, q.evaluate( pos ), pos ) );
+        Float val = q.evaluate( pos );
+        if ( val < std::numeric_limits< Float >::epsilon() )
+        {
+            val = static_cast< Float >( 0 );
+        }
+
+        heap_.insert( heap_entry( e, val, pos ) );
     }
 
     void init_heap()
