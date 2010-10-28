@@ -16,49 +16,36 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ZI_SYSTEM_DETAIL_GET_USERNAME_HPP
-#define ZI_SYSTEM_DETAIL_GET_USERNAME_HPP 1
+#ifndef ZI_UTILITY_IS_COMPLEX_HPP
+#define ZI_UTILITY_IS_COMPLEX_HPP 1
 
-#include <zi/system/config.hpp>
+#include <zi/utility/enable_if.hpp>
 
-#include <zi/utility/assert.hpp>
-#include <string>
+#include <zi/bits/type_traits.hpp>
+#include <zi/bits/complex.hpp>
 
 namespace zi {
-namespace system {
+
 namespace detail {
+namespace is_complex_ {
 
-inline std::string get_username()
+struct is_convertible_from_complex
 {
+   template< class T >
+   is_convertible_from_complex( const ::zi::complex< T >& );
+};
 
-    char buff[1024];
+template< class T >
+struct is_complex
+{
+    static const bool value = is_convertible< T, is_convertible_from_complex >::value;
+};
 
-#if ( defined( ZI_OS_LINUX ) || defined( ZI_OS_MACOS ) )
-
-    if ( !getlogin_r(buff, 1023) )
-    {
-        return std::string(buff);
-    }
-    else
-    {
-        return "";
-    }
-
-#elif defined ( ZI_OS_WINDOWS )
-
-    DWORD maxLen = 1023;
-    ZI_VERIFY( GetUserName(buff, &maxLen) );
-    return std::string(buff, maxLen);
-
-#else
-#warning "no get_username function available"
-#endif
-
-}
-
+} // namespace is_complex_
 } // namespace detail
-} // namespace system
-} // namespace zi
 
+using detail::is_complex_::is_complex;
+
+} // namespace zi
 
 #endif

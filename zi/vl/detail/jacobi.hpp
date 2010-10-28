@@ -34,8 +34,6 @@
 #include <algorithm>
 #include <iostream>
 
-#include <zi/vl/vl_prefix.hpp>
-
 namespace zi {
 namespace vl {
 namespace detail {
@@ -293,8 +291,6 @@ jacobi_svd( mat< T, N >& S, vec< T, N >& e, mat< T, N >& E,
 
 } // namespace vl
 } // namespace zi
-
-#include <zi/vl/vl_suffix.hpp>
 
 #endif
 

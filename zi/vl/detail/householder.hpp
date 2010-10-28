@@ -26,8 +26,6 @@
 #include <vector>
 #include <iostream>
 
-#include <zi/vl/vl_prefix.hpp>
-
 namespace zi {
 namespace vl {
 
@@ -536,8 +534,6 @@ householder_just_R( mat< T, N >& R,
 
 } // namespace vl
 } // namespace zi
-
-#include <zi/vl/vl_suffix.hpp>
 
 #endif
 

@@ -112,9 +112,9 @@ struct tri_mesh_vertex
 };
 
 
-} // namespace detail
+} //  namespace detail
 
-struct tri_mesh: non_copyable
+class tri_mesh //: non_copyable
 {
 public:
     typedef detail::tri_mesh_face_impl   face_type   ;
@@ -140,6 +140,8 @@ private:
 
     inline void add_edge( uint32_t x, uint32_t y, uint32_t z, uint32_t f )
     {
+        static_cast< void >( z );
+
         ZI_ASSERT( x != y );
         ZI_ASSERT( x != z );
         ZI_ASSERT( y != z );
@@ -329,6 +331,7 @@ public:
 
     void remove_face( const uint32_t x, const uint32_t y, const uint32_t z )
     {
+        static_cast< void >( z );
         unordered_map< uint64_t, edge_type >::const_iterator it =
             edges_.find( detail::make_edge( x, y ) );
 
@@ -608,6 +611,11 @@ public:
     bool has_edge( const uint32_t v0, const uint32_t v1 ) const
     {
         return edges_.count( detail::make_edge( v0, v1 ) );
+    }
+
+    std::size_t stripify() const
+    {
+        return 0;
     }
 
 };

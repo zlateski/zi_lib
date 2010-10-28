@@ -19,6 +19,7 @@
 #ifndef ZI_VL_VEC_FUNCTIONS_HPP
 #define ZI_VL_VEC_FUNCTIONS_HPP 1
 
+#include <cmath>
 #include <zi/vl/vec.hpp>
 
 namespace zi {
@@ -344,6 +345,44 @@ slerp( const vec< T, N >& p, const vec< T, N >& q, const T& a )
         return norm( ( static_cast< PT >( 1 ) - a ) * p + a * b );
     }
 }
+
+#define ZI_VL_INNER_PRODUCT_IMPL( name )                                \
+                                                                        \
+    template< class T, class O, std::size_t N >                         \
+    inline                                                              \
+    vec< typename detail::promote< T, O >::type, N >                    \
+    name ( const vec< T, N >& v1, const vec< O, N >& v2 )               \
+    {                                                                   \
+        typedef typename detail::promote< T, O >::type promoted_type;   \
+        vec< promoted_type, N > res;                                    \
+                                                                        \
+        for ( std::size_t i = 0; i < N; ++i )                           \
+        {                                                               \
+            res.at( i ) = static_cast< promoted_type >                  \
+                ( v1.at( i ) ) * v2.at( i );                            \
+        }                                                               \
+        return res;                                                     \
+    }                                                                   \
+                                                                        \
+    template< class T, std::size_t N >                                  \
+    inline                                                              \
+    vec< T, N >                                                         \
+    name ( const vec< T, N >& v1, const vec< T, N >& v2 )               \
+    {                                                                   \
+        vec< T, N > res;                                                \
+                                                                        \
+        for ( std::size_t i = 0; i < N; ++i )                           \
+        {                                                               \
+            res.at( i ) = v1.at( i ) * v2.at( i );                      \
+        }                                                               \
+        return res;                                                     \
+    }
+
+
+ZI_VL_INNER_PRODUCT_IMPL( iprod )
+ZI_VL_INNER_PRODUCT_IMPL( inner_product )
+
+#undef ZI_VL_INNER_PRODUCT_IMPL
 
 
 template< class T, class X, std::size_t N >

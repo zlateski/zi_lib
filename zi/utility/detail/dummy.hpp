@@ -27,6 +27,11 @@ template< int > struct dummy
     dummy( int ) {}
 };
 
+template< class T > struct dummy_type
+{
+    dummy_type( int ) {}
+};
+
 } // namespace detail
 } // namespace zi
 

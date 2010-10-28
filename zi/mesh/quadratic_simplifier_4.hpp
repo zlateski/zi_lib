@@ -26,7 +26,6 @@
 #include <zi/heap/binary_heap.hpp>
 #include <zi/mesh/tri_list.hpp>
 #include <zi/mesh/tri_mesh.hpp>
-#include <zi/mesh/tri_stripper.hpp>
 #include <zi/mesh/detail/quadratic.hpp>
 #include <zi/mesh/detail/qmetric.hpp>
 
@@ -46,15 +45,19 @@ class simplifier: non_copyable
 private:
     ZI_STATIC_ASSERT( is_floating_point< Float >::value, non_floating_point_mesh_simplifier );
 
-    typedef vl::vec< Float, 3 >        coord_t     ;
-    typedef detail::quadratic< Float > quadratic_t ;
+    typedef vl::vec< Float, 3 >       coord_t     ;
+    typedef qmetric< Float, 6 >       qmetric_t   ;
 
     std::size_t                 size_    ;
-    mesh::tri_mesh              mesh_    ;
-    std::vector< coord_t >      points_  ;
-    std::vector< coord_t >      normals_ ;
+    mesh::tri_mesh              mesh_cnt_   ;
+    std::vector< coord_t >      points_cnt_ ;
+    std::vector< coord_t >      normals_cnt_;
 
-    std::vector< quadratic_t >  quadratic_;
+    mesh::tri_mesh&             mesh_      ;
+    std::vector< coord_t >&     points_    ;
+    std::vector< coord_t >&     normals_   ;
+
+    std::vector< qmetric_t >    quadratic_;
 
     unordered_set< uint64_t >   invalid_ ;
 
@@ -63,6 +66,7 @@ private:
         uint64_t                  edge_   ;
         Float                     value_  ;
         const vl::vec< Float, 3 > optimal_;
+        const vl::vec< Float, 3 > optimal_normal_;
 
         Float value() const
         {
@@ -73,8 +77,10 @@ private:
         {
         }
 
-        heap_entry( const uint64_t e, const Float v, const vl::vec< Float, 3 >& p )
-            : edge_( e ), value_( v ), optimal_( p )
+        heap_entry( const uint64_t e, const Float v,
+                    const vl::vec< Float, 3 >& p,
+                    const vl::vec< Float, 3 >& q )
+            : edge_( e ), value_( v ), optimal_( p ), optimal_normal_( q )
         {
         }
 
@@ -132,7 +138,7 @@ private:
 
     inline bool check_compactness( const uint64_t e, const vl::vec< Float, 3 >& p ) const
     {
-        const Float min_compactness = 0.1;
+        const Float min_compactness = 0.002;
 
         const uint32_t v0 = detail::edge_source( e );
         const uint32_t v1 = detail::edge_sink( e );
@@ -145,12 +151,9 @@ private:
         for ( uint32_t v = tr; v != bl; )
         {
             const uint32_t vn = mesh_.across_edge( v0, v );
-            vl::vec< Float, 3 > c1 = cross( points_[ v ] - p, points_[ vn ] - p );
-            Float r = len( c1 ) * 0.5 * 6.928203230275509L
-                / ( sqrlen( p - points_[ v ] ) +
-                    sqrlen( points_[ v ] - points_[ vn ] ) +
-                    sqrlen( points_[ vn ] - p ) );
-
+            Float r = 1; //vl::triangle::compactness( p,
+                         //                        points_[ v ],
+                         //                        points_[ vn ] );
             if ( r < min_compactness )
             {
                 return false;
@@ -161,12 +164,9 @@ private:
         for ( uint32_t v = bl; v != tr; )
         {
             const uint32_t vn = mesh_.across_edge( v1, v );
-            vl::vec< Float, 3 >  c1 = cross( points_[ v ] - p, points_[ vn ] - p );
-            Float r = len( c1 ) * 0.5 * 6.928203230275509L
-                / ( sqrlen( p - points_[ v ] ) +
-                    sqrlen( points_[ v ] - points_[ vn ] ) +
-                    sqrlen( points_[ vn ] - p ) );
-
+            Float r = 1; //vl::triangle::compactness( p,
+            //                      points_[ v ],
+            //                                   points_[ vn ] );
             if ( r < min_compactness )
             {
                 return false;
@@ -184,7 +184,7 @@ private:
         //return false;
         //}
 
-        const uint32_t max_degree = 15;
+        const uint32_t max_degree = 24;
         const Float    min_angle  = 0.01;
 
         const uint32_t v0 = detail::edge_source( e );
@@ -209,6 +209,7 @@ private:
             }
 
             v = vn;
+
             ++degree;
         }
 
@@ -266,11 +267,14 @@ private:
 
 public:
 
-    explicit simplifier()
+    simplifier()
         : size_( 0 ),
-          mesh_(),
-          points_(),
-          normals_(),
+          mesh_cnt_( 0 ),
+          points_cnt_( 0 ),
+          normals_cnt_( 0 ),
+          mesh_( mesh_cnt_ ),
+          points_( points_cnt_ ),
+          normals_( normals_cnt_ ),
           quadratic_( 0 ),
           invalid_(),
           heap_()
@@ -279,16 +283,18 @@ public:
 
     explicit simplifier( std::size_t s )
         : size_( s ),
-          mesh_( s ),
-          points_( s ),
-          normals_( s ),
+          mesh_cnt_( s ),
+          points_cnt_( s ),
+          normals_cnt_( s ),
+          mesh_( mesh_cnt_ ),
+          points_( points_cnt_ ),
+          normals_( normals_cnt_ ),
           quadratic_( s ),
           invalid_(),
           heap_()
     {
     }
 
-/*
     explicit simplifier( mesh::tri_mesh& m )
         : size_( m.size() ),
           mesh_cnt_(),
@@ -302,9 +308,7 @@ public:
           heap_()
     {
     }
-*/
 
-/*
     explicit simplifier( mesh::tri_mesh& m, std::vector< coord_t >& v )
         : size_( m.size() ),
           mesh_cnt_(),
@@ -338,7 +342,7 @@ public:
         n.resize( m.size() );
     }
 
-*/
+
     vl::vec< Float, 3 >& point( std::size_t idx )
     {
         ZI_ASSERT( idx < size_ );
@@ -351,7 +355,7 @@ public:
         return points_[ idx ];
     }
 
-    detail::quadratic< Float >& quadratic( std::size_t idx )
+    qmetric< Float, 6 >& quadratic( std::size_t idx )
     {
         ZI_ASSERT( idx < size_ );
         return quadratic_[ idx ];
@@ -403,9 +407,9 @@ public:
 
     inline void prepare()
     {
-        //mesh_.check_rep();
-        generate_quadratics();
+        mesh_.check_rep();
         generate_normals();
+        generate_quadratic();
         init_heap();
     }
 
@@ -420,19 +424,13 @@ public:
         return heap_.size();
     }
 
-    inline std::size_t optimize( std::size_t target_faces,
-                                 Float max_error,
-                                 Float min_error = std::numeric_limits< Float >::epsilon() * 25 )
+    inline std::size_t optimize( std::size_t target_faces, Float max_error )
     {
 
-        //double no_faces = static_cast< double >( mesh_.face_count() );
-
         std::size_t bad = 0;
-        while ( heap_.size() )
+        while ( mesh_.face_count() > target_faces )
         {
-            if ( ( ( mesh_.face_count() <= target_faces ) &&
-                   ( heap_.top().value_ >= min_error ) ) ||
-                 ( heap_.top().value_ > max_error ) )
+            if ( ( heap_.size() == 0 ) || ( heap_.top().value_ > max_error ) )
             {
                 break;
             }
@@ -445,9 +443,7 @@ public:
         //generate_normals();
 
         invalid_.clear();
-        //std::cout << "Face ratio: " << ( static_cast< double >( mesh_.face_count() ) / no_faces ) << "\n";
-        //std::cout << "Next error: " << this->min_error() << "\n";
-        //std::cout << "Total Face: " << mesh_.face_count() << "\n";
+        std::cout << "BAD >>>>>>> " << bad << "\n\n";
         return mesh_.face_count();
     }
 
@@ -481,41 +477,6 @@ public:
         return mesh_.faces;
     }
 
-    std::size_t stripify( std::vector< uint32_t >& vertices,
-                          std::vector< uint32_t >& strip_begins,
-                          std::vector< uint32_t >& strip_lengths ) const
-    {
-        tri_stripper_impl stripper( mesh_ );
-        return stripper.execute( vertices, strip_begins, strip_lengths );
-    }
-
-    std::size_t stripify( std::vector< vl::vec< Float, 3 > >& points,
-                          std::vector< vl::vec< Float, 3 > >& normals,
-                          std::vector< uint32_t >& indices,
-                          std::vector< uint32_t >& strip_begins,
-                          std::vector< uint32_t >& strip_lengths ) const
-    {
-        tri_stripper_impl stripper( mesh_ );
-        std::size_t res = stripper.execute( indices, strip_begins, strip_lengths );
-
-        unordered_map< uint32_t, uint32_t > reduction;
-        uint32_t max_idx = 0;
-
-        for ( std::size_t i = 0; i < indices.size(); ++i )
-        {
-            if ( reduction.count( indices[ i ] ) == 0 )
-            {
-                reduction.insert( std::make_pair( indices[ i ], max_idx ) );
-                points.push_back( points_[ indices[ i ] ] );
-                normals.push_back( normals_[ indices[ i ] ] );
-                ++max_idx;
-            }
-            indices[ i ] = reduction[ indices[ i ] ];
-        }
-
-        return res;
-    }
-
 private:
 
     inline bool check_valid( const uint64_t e, const vl::vec< Float, 3 >& p ) const
@@ -525,7 +486,7 @@ private:
         return false;
     }
 
-    bool iterate()
+    inline bool iterate()
     {
         ZI_ASSERT( heap_.size() );
 
@@ -550,10 +511,10 @@ private:
             return false;
         }
 
-        if ( !check_compactness( e.edge_, e.optimal_ ) )
-        {
-            return false;
-        }
+        //if ( !check_compactness( e.edge_, e.optimal_ ) )
+        //{
+        //return false;
+        //}
 
         // erase old ones
         for ( uint32_t v = mesh_.across_edge( v0, v1 );
@@ -577,61 +538,8 @@ private:
         }
 
         uint32_t v = mesh_.collapse_edge( v0, v1 );
-
-        //Float errv0 = std::sqrt( quadratic_[ v0 ].evaluate( e.optimal_ ) );
-        //Float errv1 = std::sqrt( quadratic_[ v1 ].evaluate( e.optimal_ ) );
-
-        //static const Float sqrt_epsilon =
-        //std::sqrt( std::numeric_limits< Float >::epsilon() );
-
-
-/*
-
-        Float errv0 = quadratic_[ v0 ].evaluate( e.optimal_ );
-        Float errv1 = quadratic_[ v1 ].evaluate( e.optimal_ );
-
-        static const Float sqrt_epsilon =
-            std::numeric_limits< Float >::epsilon();
-
-        Float err = errv0 + errv1;
-
-        if ( ( errv0 < sqrt_epsilon ) &&
-             ( errv1 < sqrt_epsilon ) )
-        {
-            normals_[ v ] = norm( normals_[ v1 ] + normals_[ v0 ] );
-        }
-        else
-        {
-            if ( errv0 < sqrt_epsilon )
-            {
-                normals_[ v ] = normals_[ v0 ];
-            }
-            else
-            {
-                if ( errv1 < sqrt_epsilon )
-                {
-                    normals_[ v ] = normals_[ v1 ];
-                }
-                else
-                {
-                    errv1 /= err;
-                    normals_[ v ] = norm( slerp( normals_[ v1 ], normals_[ v0 ], errv1 ) );
-                }
-            }
-            //normals_[ v ] = normals_[ v0 ] + normals_[ v1 ];
-        }
-
-*/
-
-        //vl::vec< Float, 3 > vx = points_[ v1 ];
-        //vx += points_[ v1 ] * ( dot( points_[ v0 ] - points_[ v1 ],
-        //                           norm( normals_[ v1 ] ) ) );
-
-        //std::cout << dot( points_[ v1 ] - vx, normals_[ v0
-
-        normals_[ v ] = normals_[ v0 ] + normals_[ v1 ];
-
-        points_[ v ] = e.optimal_;
+        points_[ v ]  = e.optimal_;
+        normals_[ v ] = e.optimal_normal_;
 
         quadratic_[ v ] += ( v == v0 ) ? quadratic_[ v1 ] : quadratic_[ v0 ];
 
@@ -656,7 +564,7 @@ private:
 
     }
 
-    void generate_quadratics()
+    void generate_quadratic()
     {
         FOR_EACH( it, quadratic_ )
         {
@@ -668,13 +576,23 @@ private:
             vl::vec< Float, 3 > &v0 = points_[ it->v0() ];
             vl::vec< Float, 3 > &v1 = points_[ it->v1() ];
             vl::vec< Float, 3 > &v2 = points_[ it->v2() ];
+            //vl::vec< Float, 3 > &n0 = normals_[ it->v0() ];
+            //vl::vec< Float, 3 > &n1 = normals_[ it->v1() ];
+            //vl::vec< Float, 3 > &n2 = normals_[ it->v2() ];
 
             vl::vec< Float, 3 > a = cross( v1 - v0, v2 - v0 );
             Float area = normalize( a );
 
-            detail::quadratic< Float > q( a[ 0 ], a[ 1 ], a[ 2 ], -dot( a, v0 ) );
+            //vl::vec< Float, 6 > p0( points_[ it->v0() ], a );
+            //vl::vec< Float, 6 > p1( points_[ it->v1() ], a );
+            //vl::vec< Float, 6 > p2( points_[ it->v2() ], a );
 
-            q *= ( area * 2.0 );
+            //qmetric_t q( ( v0, v0 ), ( v1, v1 ), ( v2, v2 ) );
+
+            //a *= ( static_cast< Float >( 1 ) / sqrlen( a ) );
+            qmetric_t q( ( v0, a ), ( v1 , a ), ( v2 , a ) );
+
+            q *= area;
 
             quadratic_[ it->v0() ] += q;
             quadratic_[ it->v1() ] += q;
@@ -705,14 +623,12 @@ private:
             vl::vec< Float, 3 > &v1 = points_[ it->v1() ];
             vl::vec< Float, 3 > &v2 = points_[ it->v2() ];
 
-            vl::vec< Float, 3 > center( v0 + v1 + v2 );
-            center /= 3;
-
-            vl::vec< Float, 3 > n( norm( cross( v1 - v0, v2 - v0 ) ) );
-            //n = norm( n ); // / n_len;
-            normals_[ it->v0() ] += n * len( points_[ it->v0() ] - center );
-            normals_[ it->v1() ] += n * len( points_[ it->v1() ] - center );
-            normals_[ it->v2() ] += n * len( points_[ it->v2() ] - center );
+            vl::vec< Float, 3 > n( cross( v1 - v0, v2 - v0 ) );
+            //n *= ( static_cast< Float >( 1 ) / len( n ) );
+            n = norm( n );
+            normals_[ it->v0() ] += n;
+            normals_[ it->v1() ] += n;
+            normals_[ it->v2() ] += n;
 
             ++counts[ it->v0() ];
             ++counts[ it->v1() ];
@@ -724,13 +640,12 @@ private:
             if ( counts[ i ] > 0 )
             {
                 //normals_[ i ] /= static_cast< Float >( counts[ i ] );
-                //normalize( normals_[ i ] );
+                normalize( normals_[ i ] );
             }
         }
-
     }
 
-    void add_to_heap( uint32_t v0, uint32_t v1 )
+    inline void add_to_heap( uint32_t v0, uint32_t v1 )
     {
         const uint64_t e = detail::make_edge( v0, v1 );
 
@@ -741,31 +656,25 @@ private:
             return;
         }
 
-        //if ( invalid_.count( e ) )
-        //{
-            //return;
-        //}
+        const Float third = static_cast< Float >( 1 ) / 3;
 
-        //if ( !check_topology( e ) )
-        //{
-        //return;
-        //}
+        qmetric< Float, 6 > q( quadratic_[ v0 ] + quadratic_[ v1 ] );
 
-        detail::quadratic< Float > q( quadratic_[ v0 ] );
-        q += quadratic_[ v1 ];
-
-        vl::vec< Float, 3 > pos( 0 );
+        vl::vec< Float, 6 > pos( 0 );
 
         if ( !q.optimize( pos ) )
         {
-            if ( !q.optimize( pos, points_[ v0 ], points_[ v1 ] ) )
-            {
+            //if ( !q.optimize( pos, points_[ v0 ], points_[ v1 ] ) )
+            //{
             //std::cout << "YEA\n";
-                pos  = points_[ v0 ];
-                pos += points_[ v1 ];
-                pos *= 0.5;
-            }
+            pos  = ( points_[ v0 ], normals_[ v0 ] );
+            pos += ( points_[ v1 ], normals_[ v1 ] );
+            pos *= 0.5;
+            //}
         }
+
+        //vl::vec< Float, 3 > va( pos[ 0 ], pos[ 1 ], pos[ 2 ] );
+        //vl::vec< Float, 3 > vb( pos[ 3 ], pos[ 4 ], pos[ 5 ] );
 
         //std::cout << "ADDING TO HEAP: " << points_[ v0 ]
         //<< ", " << points_[ v1 ] << " ::: " << pos << "\n\n";
@@ -788,13 +697,11 @@ private:
         std::cout << oss.str() << std::flush ;
 */
 
-        Float val = q.evaluate( pos );
-        if ( val < std::numeric_limits< Float >::epsilon() )
-        {
-            val = static_cast< Float >( 0 );
-        }
+        //std::cout << pos << "\n";
 
-        heap_.insert( heap_entry( e, val, pos ) );
+        heap_.insert( heap_entry( e, q.evaluate( pos ),
+                                  pos.template subvector< 3, 0 >(),
+                                  pos.template subvector< 3, 3 >() ));
     }
 
     void init_heap()
@@ -824,3 +731,4 @@ private:
 } // namespace zi
 
 #endif
+

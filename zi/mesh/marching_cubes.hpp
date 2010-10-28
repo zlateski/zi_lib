@@ -20,6 +20,7 @@
 #define ZI_MESH_MARCHING_CUBES_HPP 1
 
 #include <zi/mesh/tri_mesh.hpp>
+#include <zi/mesh/quadratic_simplifier.hpp>
 
 #include <zi/bits/cstdint.hpp>
 #include <zi/bits/type_traits.hpp>
@@ -36,7 +37,7 @@
 
 #define ZI_MC_QUICK_INTERP( p1, p2, val )                               \
     ((( vals[ p1 ] == val ) ^ ( vals[ p2 ] == val )) ?                  \
-     ( vert[ p1 ] + vert[ p2 ] ) >> 1 : vert[ p1 ] )
+     (( vert[ p1 ] + vert[ p2 ] ) >> 1 ) : vert[ p1 ] )
 
 
 namespace zi {
@@ -76,21 +77,21 @@ private:
     }
 
     template< class T >
-    static inline T unpack_x( uint64_t packed, const T& factor = T( 1 ) )
+    static inline T unpack_x( uint64_t packed, const T& offset = T( 0 ), const T& factor = T( 1 ) )
     {
-        return factor * ( ( packed >> 42 ) & z_mask );
+        return factor * ( offset + ( ( packed >> 42 ) & z_mask ) );
     }
 
     template< class T >
-    static inline T unpack_y( uint64_t packed, const T& factor = T( 1 ) )
+    static inline T unpack_y( uint64_t packed, const T& offset = T( 0 ), const T& factor = T( 1 ) )
     {
-        return factor * ( ( packed >> 21 ) & z_mask );
+        return factor * ( offset + ( ( packed >> 21 ) & z_mask ) );
     }
 
     template< class T >
-    static inline T unpack_z( uint64_t packed, const T& factor = T( 1 ) )
+    static inline T unpack_z( uint64_t packed, const T& offset = T( 0 ), const T& factor = T( 1 ) )
     {
-        return factor * ( packed & z_mask );
+        return factor * ( offset + ( packed & z_mask ) );
     }
 
 public:
@@ -268,9 +269,10 @@ public:
                             for ( std::size_t n = 0; tri_table[ c ][ n ] != tri_table_end; n += 3)
                             {
                                 ++num_faces_;
-                                meshes_[ *it ].push_back( triangle( ptrs_[ tri_table[ c ][ n + 2 ] ],
-                                                                    ptrs_[ tri_table[ c ][ n + 1 ] ],
-                                                                    ptrs_[ tri_table[ c ][ n ] ] ));
+                                meshes_[ *it ].push_back
+                                    ( triangle( ptrs_[ tri_table[ c ][ n + 2 ] ],
+                                                ptrs_[ tri_table[ c ][ n + 1 ] ],
+                                                ptrs_[ tri_table[ c ][ n ] ] ) );
                             }
 
                         }
@@ -315,6 +317,9 @@ public:
     fill_tri_mesh( const Type& id,
                    tri_mesh& ret,
                    std::vector< vl::vec< T, 3 > >& points,
+                   const T& xtrans = T( 0 ),
+                   const T& ytrans = T( 0 ),
+                   const T& ztrans = T( 0 ),
                    const T& xscale = T( 1 ),
                    const T& yscale = T( 1 ),
                    const T& zscale = T( 1 ) ) const
@@ -351,9 +356,9 @@ public:
         FOR_EACH( it, pts )
         {
             points[ it->second ] = vl::vec< T, 3 >
-                ( this_type::template unpack_x< T >( it->first, xscale ),
-                  this_type::template unpack_y< T >( it->first, yscale ),
-                  this_type::template unpack_z< T >( it->first, zscale ) );
+                ( this_type::template unpack_x< T >( it->first, xtrans, xscale ),
+                  this_type::template unpack_y< T >( it->first, ytrans, yscale ),
+                  this_type::template unpack_z< T >( it->first, ztrans, zscale ) );
 
 
         }
@@ -366,6 +371,64 @@ public:
         return idx;
 
     }
+
+    template< class T > std::size_t
+    fill_simplifier( ::zi::mesh::simplifier< T >& ret,
+                     const Type& id,
+                     const T& xtrans = T( 0 ),
+                     const T& ytrans = T( 0 ),
+                     const T& ztrans = T( 0 ),
+                     const T& xscale = T( 1 ),
+                     const T& yscale = T( 1 ),
+                     const T& zscale = T( 1 ) ) const
+    {
+        if ( !meshes_.count( id ) )
+        {
+            return 0;
+        }
+
+        uint32_t idx = 0;
+        unordered_map< uint64_t, uint32_t > pts;
+
+        const std::vector< triangle >& data = meshes_.find( id )->second;
+
+        FOR_EACH( it, data )
+        {
+            if ( !pts.count( it->a_ ) )
+            {
+                pts.insert( std::make_pair( it->a_, idx++ ) );
+            }
+            if ( !pts.count( it->b_ ) )
+            {
+                pts.insert( std::make_pair( it->b_, idx++ ) );
+            }
+            if ( !pts.count( it->c_ ) )
+            {
+                pts.insert( std::make_pair( it->c_, idx++ ) );
+            }
+        }
+
+        ret.resize( idx );
+
+        FOR_EACH( it, pts )
+        {
+            ret.point( it->second ) = vl::vec< T, 3 >
+                ( this_type::template unpack_x< T >( it->first, xtrans, xscale ),
+                  this_type::template unpack_y< T >( it->first, ytrans, yscale ),
+                  this_type::template unpack_z< T >( it->first, ztrans, zscale ) );
+
+
+        }
+
+        FOR_EACH( it, data )
+        {
+            ret.add_face( pts[ it->a_ ], pts[ it->b_ ], pts[ it->c_ ] );
+        }
+
+        return idx;
+
+    }
+
 
 };
 

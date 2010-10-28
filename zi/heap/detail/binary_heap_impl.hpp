@@ -65,7 +65,7 @@ private:
 
 private:
 
-    inline void try_grow()
+    void try_grow()
     {
         if ( size_ == reserved_ )
         {
@@ -104,9 +104,9 @@ private:
         ZI_ASSERT( size_ < reserved_ );
     }
 
-    inline void try_shrink()
+    void try_shrink()
     {
-        if ( ( ( size_ << 2 ) < reserved_ ) && ( reserved_ > 128 ) )
+        if ( ( ( size_ << 2 ) < reserved_ ) && ( reserved_ > 4096 ) )
         {
             ZI_ASSERT( size_ == keymap_.size() );
 
@@ -221,22 +221,22 @@ public:
         return size_;
     }
 
-    inline bool empty() const
+    bool empty() const
     {
         return size_ == 0;
     }
 
-    inline std::size_t count( const Type& v ) const
+    std::size_t count( const Type& v ) const
     {
         return keymap_.count( key_extractor_( const_cast< Type& >( v ) ) );
     }
 
-    inline std::size_t key_count( const KeyType& v ) const
+    std::size_t key_count( const KeyType& v ) const
     {
         return keymap_.count( v );
     }
 
-    inline const Type& top() const
+    const Type& top() const
     {
         if ( size_ == 0 )
         {
@@ -245,7 +245,7 @@ public:
         return store_[ heap_[ 0 ] ];
     }
 
-    inline Type& top()
+    Type& top()
     {
         if ( size_ == 0 )
         {
@@ -254,7 +254,7 @@ public:
         return store_[ heap_[ 0 ] ];
     }
 
-    inline void insert( const Type& v )
+    void insert( const Type& v )
     {
         if ( !count( v ) )
         {
@@ -262,7 +262,7 @@ public:
         }
     }
 
-    inline std::size_t erase( const Type& v )
+    std::size_t erase( const Type& v )
     {
         if ( count( v ) )
         {
@@ -272,7 +272,7 @@ public:
         return 0;
     }
 
-    inline std::size_t erase_key( const KeyType& v )
+    std::size_t erase_key( const KeyType& v )
     {
         if ( key_count( v ) )
         {
@@ -282,7 +282,7 @@ public:
         return 0;
     }
 
-    inline void pop()
+    void pop()
     {
         if ( size_ > 0 )
         {
@@ -290,7 +290,7 @@ public:
         }
     }
 
-    inline void clear()
+    void clear()
     {
         clear_();
     }
@@ -298,14 +298,14 @@ public:
 
 private:
 
-    inline void swap_elements( uint32_t x, uint32_t y )
+    void swap_elements( uint32_t x, uint32_t y )
     {
         std::swap( heap_[ x ], heap_[ y ] );
         map_[ heap_[ x ] ] = x;
         map_[ heap_[ y ] ] = y;
     }
 
-    inline void heap_up( uint32_t index )
+    void heap_up( uint32_t index )
     {
         uint32_t parent = ( index - 1 ) / 2;
         while ( index > 0 && compare_( value_extractor_( store_[ heap_[ index  ] ] ),
@@ -317,7 +317,7 @@ private:
         }
     }
 
-    inline void heap_down( uint32_t index )
+    void heap_down( uint32_t index )
     {
         uint32_t child = index * 2 + 1;
         while ( child < size_ )
@@ -341,7 +341,7 @@ private:
         }
     }
 
-    inline void insert_( const Type& v )
+    void insert_( const Type& v )
     {
         ZI_ASSERT( heap_[ size_ ] < reserved_ );
 
@@ -358,7 +358,7 @@ private:
         try_grow();
     }
 
-    inline void clear_()
+    void clear_()
     {
         for ( uint32_t i = 0; i < size_; ++i )
         {
@@ -368,7 +368,7 @@ private:
         if ( reserved_ > 16 )
         {
 
-            alloc_.deallocate( store_ + 16, reserved_ - 16 );
+            alloc_.deallocate( store_, reserved_ );
 
             delete [] heap_;
             delete [] map_ ;
@@ -377,6 +377,7 @@ private:
             map_  = new uint32_t[ 16 ];
 
             reserved_ = 16;
+            store_ = alloc_.allocate( reserved_ );
 
             for ( uint32_t i = 0; i < reserved_; ++i )
             {
@@ -388,17 +389,17 @@ private:
         keymap_.clear();
     }
 
-    inline void erase_( const Type& v )
+    void erase_( const Type& v )
     {
         erase_at_( keymap_[ key_extractor_( const_cast< Type& > ( v ) ) ] );
     }
 
-    inline void erase_key_( const KeyType& k )
+    void erase_key_( const KeyType& k )
     {
         erase_at_( keymap_[ k ] );
     }
 
-    inline void erase_at_( const uint32_t pos )
+    void erase_at_( const uint32_t pos )
     {
         ZI_VERIFY( keymap_.erase( key_extractor_( store_[ pos ] )));
 

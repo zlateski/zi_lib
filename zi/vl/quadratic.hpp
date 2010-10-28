@@ -16,8 +16,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ZI_MESH_DETAIL_QUADRATIC_HPP
-#define ZI_MESH_DETAIL_QUADRATIC_HPP 1
+#ifndef ZI_VL_QUADRATIC_HPP
+#define ZI_VL_QUADRATIC_HPP 1
 
 #include <zi/vl/vec.hpp>
 #include <zi/vl/mat.hpp>
@@ -31,8 +31,7 @@
 #include <iomanip>
 
 namespace zi {
-namespace mesh {
-namespace detail {
+namespace vl {
 
 template< class T >
 class quadratic
@@ -47,15 +46,14 @@ protected:
     T /* ad,   bd,   cd,*/ d2;
 
 public:
-
     inline T offset() const
     {
         return d2;
     }
 
-    inline zi::vl::vec< T, 3 > vector() const
+    inline vec< T, 3 > vector() const
     {
-        return zi::vl::vec< T, 3 >( ad, bd, cd );
+        return vec< T, 3 >( ad, bd, cd );
     }
 
 private:
@@ -68,7 +66,7 @@ private:
     }
 
     template< class Y >
-    inline void init( const zi::vl::mat< Y, 4 > &m )
+    inline void init( const mat< Y, 4 > &m )
     {
         a2 = static_cast< T >( m.at( 0, 0 ) );
         ab = static_cast< T >( m.at( 0, 1 ) );
@@ -82,7 +80,7 @@ private:
         d2 = static_cast< T >( m.at( 3, 3 ) );
     }
 
-    inline void init( const zi::vl::mat< T, 4 > &m )
+    inline void init( const mat< T, 4 > &m )
     {
         a2 = m.at( 0, 0 );
         ab = m.at( 0, 1 );
@@ -114,18 +112,18 @@ public:
     }
 
     template< class Y >
-    explicit quadratic( const zi::vl::mat< Y, 4 >& o )
+    explicit quadratic( const mat< Y, 4 >& o )
     {
         init( o );
     }
 
-    explicit quadratic( const zi::vl::mat< T, 4 >& o )
+    explicit quadratic( const mat< T, 4 >& o )
     {
         init( o );
     }
 
 
-#define ZI_QUADRATIC_COMPOUND_OPERATOR( op )                    \
+#define ZI_VL_QUADRATIC_COMPOUND_OPERATOR( op )                 \
                                                                 \
     template< class Y >                                         \
     quadratic< T >& operator op( const quadratic< Y >& x )      \
@@ -159,11 +157,11 @@ public:
     }
 
 
-    ZI_QUADRATIC_COMPOUND_OPERATOR( =  );
-    ZI_QUADRATIC_COMPOUND_OPERATOR( -= );
-    ZI_QUADRATIC_COMPOUND_OPERATOR( += );
+    ZI_VL_QUADRATIC_COMPOUND_OPERATOR( =  );
+    ZI_VL_QUADRATIC_COMPOUND_OPERATOR( -= );
+    ZI_VL_QUADRATIC_COMPOUND_OPERATOR( += );
 
-#undef ZI_QUADRATIC_COMPOUND_OPERATOR
+#undef ZI_VL_QUADRATIC_COMPOUND_OPERATOR
 
     quadratic< T >& operator*=( const T& c )
     {
@@ -184,67 +182,67 @@ public:
     }
 
     template< class Y >
-    T evaluate( const zi::vl::vec< Y, 3 >& v ) const
+    T evaluate( const vec< Y, 3 >& v ) const
     {
         return evaluate( v.at( 0 ), v.at( 1 ), v.at( 2 ) );
     }
 
-    T evaluate( const zi::vl::vec< T, 3 >& v ) const
+    T evaluate( const vec< T, 3 >& v ) const
     {
         return evaluate( v.at( 0 ), v.at( 1 ), v.at( 2 ) );
     }
 
-    T operator()( const T& x, const T& y, const T& z ) const
+    inline T operator()( const T& x, const T& y, const T& z ) const
     {
         return evaluate( x, y, z );
     }
 
     template< class Y >
-    T operator()( const zi::vl::vec< Y, 3 >& v ) const
+    inline T operator()( const vec< Y, 3 >& v ) const
     {
         return evaluate( v.at( 0 ), v.at( 1 ), v.at( 2 ) );
     }
 
-    T operator()( const zi::vl::vec< T, 3 >& v ) const
+    inline T operator()( const vec< T, 3 >& v ) const
     {
         return evaluate( v.at( 0 ), v.at( 1 ), v.at( 2 ) );
     }
 
-    zi::vl::mat< T, 3 > tensor() const
+    inline mat< T, 3 > tensor() const
     {
-        return zi::vl::mat< T, 3 >( a2, ab, ac, ab, b2, bc, ac, bc, c2 );
+        return mat< T, 3 >( a2, ab, ac, ab, b2, bc, ac, bc, c2 );
     }
 
-    zi::vl::mat< T, 4 > homogenous() const
+    inline mat< T, 4 > homogenous() const
     {
-        return zi::vl::mat< T, 4 >( a2, ab, ac, ad,
-                                    ab, b2, bc, bd,
-                                    ac, bc, c2, cd,
-                                    ad, bd, cd, d2 );
+        return mat< T, 3 >( a2, ab, ac, ad,
+                            ab, b2, bc, bd,
+                            ac, bc, c2, cd,
+                            ad, bd, cd, d2 );
     }
 
-    void clear( const T& x = 0 )
+    inline void clear( const T& x = 0 )
     {
         a2 = ab = ac = ad = b2 = bc = bd = c2 = cd = d2 = x;
     }
 
-    bool optimize( zi::vl::vec< T, 3 >& v ) const
+    inline bool optimize( vec< T, 3 >& v ) const
     {
-        zi::vl::mat< T, 3 > ainv( a2, ab, ac,
-                                  ab, b2, bc,
-                                  ac, bc, c2 );
+        mat< T, 3 > ainv( a2, ab, ac,
+                          ab, b2, bc,
+                          ac, bc, c2 );
 
-        if ( zi::vl::invert( ainv ) )
+        if ( invert( ainv ) )
         {
-            v = -( ainv * zi::vl::vec< T, 3 >( ad, bd, cd ) );
+            v = -( ainv * vec< T, 3 >( ad, bd, cd ) );
             return true;
         }
         return false;
     }
 
-    bool optimize( T &x, T& y, T& z )
+    inline bool optimize( T &x, T& y, T& z )
     {
-        zi::vl::vec< T, 3 > v;
+        vec< T, 3 > v;
         if ( optimize( v ) )
         {
             x = v.at( 0 );
@@ -255,17 +253,17 @@ public:
         return false;
     }
 
-    bool optimize( zi::vl::vec< T, 3 >& v,
-                          const zi::vl::vec< T, 3 >& v1,
-                          const zi::vl::vec< T, 3 >& v2 ) const
+    inline bool optimize( vec< T, 3 >& v,
+                          const vec< T, 3 >& v1,
+                          const vec< T, 3 >& v2 ) const
     {
-        zi::vl::vec< T, 3 > d = v1 - v2;
-        zi::vl::mat< T, 3 > a = tensor();
+        vec< T, 3 > d = v1 - v2;
+        mat< T, 3 > a = tensor();
 
-        zi::vl::vec< T, 3 > av2 = a * v2;
-        zi::vl::vec< T, 3 > ad  = a * d;
+        vec< T, 3 > av2 = a * v2;
+        vec< T, 3 > ad  = a * d;
 
-        const T denom = dot( d, ad );
+        const T denom = d.dot( ad );
 
         if ( std::fabs( denom ) <= std::numeric_limits< T >::epsilon() )
         {
@@ -274,7 +272,7 @@ public:
 
         T invdenom = static_cast< T >( 2 ) / denom;
 
-        T q = -( dot( vector(), d ) * 2 + dot( av2, d ) + dot( v2, ad ) ) * invdenom;
+        T q = -( dot( d, tensor() ) * 2 + dot( av2, d ) + dot( v2, ad ) ) * invdenom;
 
         q = q < 0 ? 0 : ( q > 1 ? 1 : q );
 
@@ -299,12 +297,12 @@ public:
 
 template< class T, class Y >
 inline
-quadratic< typename ::zi::vl::detail::promote< T, Y >::type >
+quadratic< typename detail::promote< T, Y >::type >
 operator+( const quadratic< T >& x, const quadratic< Y >& y )
 {
-    quadratic< typename ::zi::vl::detail::promote< T, Y >::type > res( x );
-    res += y;
-    return res;
+    quadratic< typename detail::promote< T, Y >::type > res( x );
+    x += y;
+    return x;
 }
 
 template< class T >
@@ -313,18 +311,18 @@ quadratic< T >
 operator+( const quadratic< T >& x, const quadratic< T >& y )
 {
     quadratic< T > res( x );
-    res += y;
-    return res;
+    x += y;
+    return x;
 }
 
 template< class T, class Y >
 inline
-quadratic< typename ::zi::vl::detail::promote< T, Y >::type >
+quadratic< typename detail::promote< T, Y >::type >
 operator-( const quadratic< T >& x, const quadratic< Y >& y )
 {
-    quadratic< typename ::zi::vl::detail::promote< T, Y >::type > res( x );
-    res -= y;
-    return res;
+    quadratic< typename detail::promote< T, Y >::type > res( x );
+    x -= y;
+    return x;
 }
 
 template< class T >
@@ -333,8 +331,8 @@ quadratic< T >
 operator-( const quadratic< T >& x, const quadratic< T >& y )
 {
     quadratic< T > res( x );
-    res -= y;
-    return res;
+    x -= y;
+    return x;
 }
 
 template< class T >
@@ -342,8 +340,8 @@ inline quadratic< T >
 operator+( const quadratic< T >& x, const T& y )
 {
     quadratic< T > res( x );
-    res += y;
-    return res;
+    x += y;
+    return x;
 }
 
 template< class T >
@@ -351,8 +349,8 @@ inline quadratic< T >
 operator+( const T& y, const quadratic< T >& x )
 {
     quadratic< T > res( x );
-    res += y;
-    return res;
+    x += y;
+    return x;
 }
 
 template< class T >
@@ -360,8 +358,8 @@ inline quadratic< T >
 operator-( const quadratic< T >& x, const T& y )
 {
     quadratic< T > res( x );
-    res -= y;
-    return res;
+    x -= y;
+    return x;
 }
 
 template< class T >
@@ -369,8 +367,8 @@ inline quadratic< T >
 operator*( const quadratic< T >& x, const T& y )
 {
     quadratic< T > res( x );
-    res *= y;
-    return res;
+    x *= y;
+    return x;
 }
 
 template< class T >
@@ -378,12 +376,12 @@ inline quadratic< T >
 operator*( const T& y, const quadratic< T >& x )
 {
     quadratic< T > res( x );
-    res *= y;
-    return res;
+    x *= y;
+    return x;
 }
 
-} // namespace detail
-} // namespace mesh
+
+} // namespace vl
 } // namespace zi
 
 #endif

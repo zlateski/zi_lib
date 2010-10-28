@@ -490,45 +490,6 @@ ZI_VL_OUTER_PRODUCT_IMPL( outer_product )
 
 #undef ZI_VL_OUTER_PRODUCT_IMPL
 
-#define ZI_VL_INNER_PRODUCT_IMPL( name )                                \
-                                                                        \
-    template< class T, class O, std::size_t N >                         \
-    inline                                                              \
-    vec< typename detail::promote< T, O >::type, N >                    \
-    name ( const vec< T, N >& v1, const vec< O, N >& v2 )               \
-    {                                                                   \
-        typedef typename detail::promote< T, O >::type promoted_type;   \
-        vec< promoted_type, N > res;                                    \
-                                                                        \
-        for ( std::size_t i = 0; i < N; ++i )                           \
-        {                                                               \
-            res.at( i ) = static_cast< promoted_type >                  \
-                ( v1.at( i ) ) * v2.at( i );                            \
-        }                                                               \
-        return res;                                                     \
-    }                                                                   \
-                                                                        \
-    template< class T, std::size_t N >                                  \
-    inline                                                              \
-    vec< T, N >                                                         \
-    name ( const vec< T, N >& v1, const vec< T, N >& v2 )               \
-    {                                                                   \
-        vec< T, N > res;                                                \
-                                                                        \
-        for ( std::size_t i = 0; i < N; ++i )                           \
-        {                                                               \
-            res.at( i ) = v1.at( i ) * v2.at( i );                      \
-        }                                                               \
-        return res;                                                     \
-    }
-
-
-ZI_VL_INNER_PRODUCT_IMPL( iprod )
-ZI_VL_INNER_PRODUCT_IMPL( inner_product )
-
-#undef ZI_VL_INNER_PRODUCT_IMPL
-
-
 } // namespace vl
 } // namespace zi
 

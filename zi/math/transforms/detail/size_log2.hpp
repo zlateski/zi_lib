@@ -16,49 +16,53 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ZI_SYSTEM_DETAIL_GET_USERNAME_HPP
-#define ZI_SYSTEM_DETAIL_GET_USERNAME_HPP 1
+#ifndef ZI_MATH_TRANSFORMS_DETAIL_SIZE_LOG2_HPP
+#define ZI_MATH_TRANSFORMS_DETAIL_SIZE_LOG2_HPP 1
 
-#include <zi/system/config.hpp>
-
+#include <zi/bits/type_traits.hpp>
+#include <zi/utility/static_assert.hpp>
 #include <zi/utility/assert.hpp>
-#include <string>
+
+#include <limits>
+#include <cstddef>
 
 namespace zi {
-namespace system {
+namespace math {
 namespace detail {
 
-inline std::string get_username()
+
+template< class T >
+std::size_t size_log2( T x )
 {
+    ZI_STATIC_ASSERT( is_integral< T >::value, non_integral_value_given );
+    ZI_ASSERT( x > 0 );
 
-    char buff[1024];
+    std::size_t t = integral_constant< std::size_t, sizeof( T ) >::value * 4;
+    std::size_t r = 0;
 
-#if ( defined( ZI_OS_LINUX ) || defined( ZI_OS_MACOS ) )
-
-    if ( !getlogin_r(buff, 1023) )
+    if ( x & ( x-1 ) )
     {
-        return std::string(buff);
-    }
-    else
-    {
-        return "";
+        ++r;
     }
 
-#elif defined ( ZI_OS_WINDOWS )
+    while ( x != 1 )
+    {
+        const T q = static_cast< T >( x >> t );
+        if ( q )
+        {
+            x = q;
+            r += t;
+        }
+        t /= 2;
+    }
 
-    DWORD maxLen = 1023;
-    ZI_VERIFY( GetUserName(buff, &maxLen) );
-    return std::string(buff, maxLen);
-
-#else
-#warning "no get_username function available"
-#endif
-
+    return r;
 }
 
 } // namespace detail
-} // namespace system
+} // namespace math
 } // namespace zi
 
-
 #endif
+
+
