@@ -31,7 +31,6 @@ struct get_instance
 {
     typedef typename bare_type< Type >::type type;
 
-    static type         static_instance;
     static type&        static_reference;
     static const type&  static_const_reference;
     static type*        static_pointer;

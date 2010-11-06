@@ -29,7 +29,6 @@
 
 #include <sstream>
 
-
 namespace zi {
 namespace zlog {
 
@@ -39,6 +38,8 @@ class sink;
 class token: non_copyable
 {
 private:
+    typedef std::ios_base& (ios_base_manipulator)( std::ios_base& );
+
     bool               done_;
     std::ostringstream out_ ;
 
@@ -60,6 +61,13 @@ private:
     friend class sink;
 
 public:
+
+    token&
+    operator<< ( ios_base_manipulator& manipulator )
+    {
+        manipulator( out_ );
+        return *this;
+    }
 
     template< class T >
     typename enable_if< is_printable< T >::value, token& >::type
