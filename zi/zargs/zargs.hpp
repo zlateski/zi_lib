@@ -28,7 +28,7 @@
                                                                         \
     namespace __zi_arg_namespace_for_ ## _name {                        \
                                                                         \
-        static _type ZiARG_ ## _name = _default;                        \
+        _type ZiARG_ ## _name = _default;                               \
         class arg_handler_ ## _name :                                   \
             public zi::zargs_::arguments::handler                       \
         {                                                               \
@@ -79,7 +79,7 @@
             }                                                           \
         };                                                              \
                                                                         \
-        static arg_handler_ ## _name arg_handler_ ## _name ## _inst;    \
+        arg_handler_ ## _name arg_handler_ ## _name ## _inst;           \
     }                                                                   \
                                                                         \
     using __zi_arg_namespace_for_ ## _name::ZiARG_ ## _name
