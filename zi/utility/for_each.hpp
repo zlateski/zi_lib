@@ -29,21 +29,27 @@
 #  define FOR_EACH_R( it, cnt )                                 \
     FOR_EACH_RANGE( it, ( cnt ).rbegin(), ( cnt ).rend() )
 
+#  define REVERSE_FOR_EACH FOR_EACH_R
+
 #  define FOR_EACH_RANGE( it, begin, end )                              \
     for (__typeof__( begin ) it = ( begin ); it != ( end ); ++it)
 
-#  ifndef ZI_NO_LOWERCASE_FOREACH
+#  ifdef ZI_USE_LOWERCASE_FOREACH
 #
 #    ifndef foreach
-#      define foreach( it, cnt ) FOR_EACH( it, cnt )
+#      define foreach FOR_EACH
 #    endif
 #
 #    ifndef foreach_r
-#      define foreach_r( it, cnt ) FOR_EACH_R( it, cnt )
+#      define foreach_r FOR_EACH_R
+#    endif
+#
+#    ifndef reverse_foreach
+#      define reverse_foreach foreach_r
 #    endif
 #
 #    ifndef foreach_range
-#      define foreach_range( it, begin, end ) FOR_EACH_RANGE( it, begin, end )
+#      define foreach_range FOR_EACH_RANGE
 #    endif
 #
 #  endif // ZI_NO_LOWERCASE_FOREACH

@@ -43,18 +43,6 @@ inline uint64_t step_abc( uint64_t x )
     return ( b & -b );
 }
 
-inline uint64_t bit_position( uint64_t y )
-{
-    uint64_t z = ( y - 1 ) & 0x8080808080808080ull;
-    z *= 0x0202020202020202ull;
-    z >>= 53;
-    uint64_t p = ( y >> z );
-    p *= 0x8040201008040201ull;
-    p &= 0x8080808080808080ull;
-    p *= 0x120e0c0a08060402ull;
-    return ( p >> 56 ) + z;
-}
-
 inline uint64_t step_abcd( uint64_t x )
 {
     uint64_t p = (( step_abc( x ) * 0x8040201008040201ull ) &
@@ -76,7 +64,24 @@ inline uint64_t int_log2( uint64_t x )
     return step_abcd( x );
 }
 
+inline uint64_t bit_position( uint64_t y )
+{
+    uint64_t z = ( y - 1 ) & 0x8080808080808080ull;
+    z *= 0x0202020202020202ull;
+    z >>= 53;
+    uint64_t p = ( y >> z );
+    p *= 0x8040201008040201ull;
+    p &= 0x8080808080808080ull;
+    p *= 0x120e0c0a08060402ull;
+    return ( p >> 56 ) + z;
 }
+
+
+}
+
+using int_log2_::bit_position;
+using int_log2_::int_log2;
+
 
 } // namespace math
 } // namespace zi

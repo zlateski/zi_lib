@@ -28,6 +28,7 @@ namespace zargs_ {
 
 template< class Type > struct matcher_base
 {
+    virtual ~matcher_base() {}
     virtual bool match( const std::string &name, std::list< std::string > &q ) const
     {
         if ( q.empty() )
