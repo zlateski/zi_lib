@@ -21,74 +21,90 @@
 
 #include <zi/config/config.hpp>
 #include <zi/bits/type_traits.hpp>
+#include <zi/bits/cstdint.hpp>
 #include <zi/utility/enable_if.hpp>
+#include <zi/utility/assert.hpp>
 #include <zi/utility/detail/empty_type.hpp>
 
 #include <cstddef>
 #include <cassert>
+#include <cstring>
+#include <cstdlib>
+#include <iostream>
 
 namespace zi {
 
 template< class T >
 class disjoint_sets:
-        enable_if< is_integral< T >::value, empty_type >::type
+        enable_if< is_integral< T >::value, detail::empty_type >::type
 {
 
 private:
-    struct node
+    T        *p_;
+    uint8_t  *r_;
+    T         size_ ;
+    T         sets_ ;
+
+    void init( T s )
     {
-        T r, p;
+        ZI_ASSERT( s >= 0 );
+        p_ = reinterpret_cast< T* >( malloc( s * sizeof( T ) ));
+        r_ = reinterpret_cast< uint8_t* >( malloc( s * sizeof( uint8_t ) ));
 
-        node(): r(0), p(0)
+        for ( T i = 0; i < s; ++i )
         {
+            p_[ i ] = i;
+            r_[ i ] = 0;
         }
-    };
-
-    node  *x_;
-    std::size_t size_ ;
-    std::size_t sets_ ;
+        size_ = sets_ = s;
+    }
 
 public:
 
-    disjoint_sets( std::size_t s ): size_( s ), sets_( s )
+    explicit disjoint_sets( const T& s = 0 ): p_( 0 ), r_( 0 ), size_( 0 ), sets_( 0 )
     {
-        assert( s >= 0 );
-        x_ = new node[ s ];
-        for ( std::size_t i = 0; i < s; ++i )
+        if ( s > 0 )
         {
-            x_[ i ].p = i;
+            init( s );
         }
     }
 
     ~disjoint_sets()
     {
-        delete [] x_;
+        if ( p_ )
+        {
+            free( p_ );
+        }
+        if ( r_ )
+        {
+            free( r_ );
+        }
     }
 
-    inline T find_set( T id ) const
+    inline T find_set( const T& id ) const
     {
-        assert( id < size_ );
-        T n( id ), x;
+        ZI_ASSERT( id < size_ );
+        T i( id ), n( id ), x;
 
-        while ( n != x_[ n ].p )
+        while ( n != p_[ n ] )
         {
-            n = x_[ n ].p;
+            n = p_[ n ];
         }
 
-        while ( n != id )
+        while ( n != i )
         {
-            x = x_[ id ].p;
-            x_[ id ].p = n;
-            id = x;
+            x = p_[ id ];
+            p_[ id ] = n;
+            i = x;
         }
 
         return n;
     }
 
-    inline T join( T x, T y )
+    inline T join( const T& x, const T& y )
     {
-        assert( x < size_ && x >= 0 );
-        assert( y < size_ && y >= 0 );
+        ZI_ASSERT( x < size_ && x >= 0 );
+        ZI_ASSERT( y < size_ && y >= 0 );
 
         if ( x == y )
         {
@@ -97,36 +113,53 @@ public:
 
         --sets_;
 
-        if ( x_[ x ].r >= x_[ y ].r )
+        if ( r_[ x ] >= r_[ y ] )
         {
-            x_[ y ].p = x;
-            if ( x_[ x ].r == x_[ y ].r )
+            p_[ y ] = x;
+            if ( r_[ x ] == r_[ y ] )
             {
-                ++x_[x].r;
+                ++r_[ x ];
             }
             return x;
         }
 
-        x_[ x ].p = y;
+        p_[ x ] = y;
         return y;
     }
 
     inline void clear()
     {
-        for ( std::size_t i = 0; i < size_; ++i )
+        for ( T i = 0; i < size_; ++i )
         {
-            x_[ i ].p = i;
-            x_[ i ].r = 0;
+            p_[ i ] = i;
+            r_[ i ] = 0;
         }
         sets_ = size_;
     }
 
-    std::size_t size() const
+    inline void resize( const T& s )
+    {
+        if ( s != size_ )
+        {
+            if ( size_ )
+            {
+                free( p_ );
+                free( r_ );
+            }
+            init( s );
+        }
+        else
+        {
+            clear();
+        }
+    }
+
+    T size() const
     {
         return size_;
     }
 
-    std::size_t set_size() const
+    T set_count() const
     {
         return sets_;
     }

@@ -23,6 +23,9 @@
 #include <zi/concurrency/detail/simple_task_container.hpp>
 #include <zi/concurrency/detail/priority_task_container.hpp>
 
+#include <zi/bits/type_traits.hpp>
+#include <zi/meta/enable_if.hpp>
+
 namespace zi {
 namespace concurrency_ {
 
@@ -94,6 +97,29 @@ public:
         }
     }
 
+    template< class Runnable >
+    void push_front( shared_ptr< Runnable > task,
+                    std::size_t count = 1,
+                    typename meta::enable_if<
+                    typename is_base_of< runnable, Runnable >::type >::type* = 0 )
+    {
+        for ( ; count > 0; -- count )
+        {
+            manager_->push_front( task );
+        }
+    }
+
+    template< class Function >
+    void push_front( const Function& task,
+                    typename meta::enable_if<
+                    typename is_convertible< Function, function< void() >
+                    >::type >::type* = 0 )
+    {
+        push_front( shared_ptr< runnable_function_wrapper >
+                   ( new runnable_function_wrapper( task ) ));
+    }
+
+
     void push_back( shared_ptr< runnable > task, std::size_t count = 1 )
     {
         for ( ; count > 0; -- count )
@@ -102,15 +128,78 @@ public:
         }
     }
 
+    template< class Runnable >
+    void push_back( shared_ptr< Runnable > task,
+                    std::size_t count = 1,
+                    typename meta::enable_if<
+                    typename is_base_of< runnable, Runnable >::type >::type* = 0 )
+    {
+        for ( ; count > 0; -- count )
+        {
+            manager_->push_back( task );
+        }
+    }
+
+    template< class Function >
+    void push_back( const Function& task,
+                    std::size_t count = 1,
+                    typename meta::enable_if<
+                    typename is_convertible< Function, function< void() >
+                    >::type >::type* = 0 )
+    {
+        this->push_back( shared_ptr< runnable_function_wrapper >
+                         ( new runnable_function_wrapper( task ) ), count );
+    }
+
     void add_task( shared_ptr< runnable > task, std::size_t count = 1 )
     {
         push_back( task, count );
+    }
+
+    template< class Runnable >
+    void add_task( shared_ptr< Runnable > task,
+                    std::size_t count = 1,
+                    typename meta::enable_if<
+                    typename is_base_of< runnable, Runnable >::type >::type* = 0 )
+    {
+        this->template push_back< Runnable >( task, count );
+    }
+
+    template< class Function >
+    void add_task( const Function& task,
+                   typename meta::enable_if<
+                   typename is_convertible< Function, function< void() >
+                   >::type >::type* = 0 )
+    {
+        add_task( shared_ptr< runnable_function_wrapper >
+                  ( new runnable_function_wrapper( task ) ));
     }
 
     void insert( shared_ptr< runnable > task, std::size_t count = 1 )
     {
         push_back( task, count );
     }
+
+
+    template< class Runnable >
+    void insert( shared_ptr< Runnable > task,
+                 std::size_t count = 1,
+                 typename meta::enable_if<
+                 typename is_base_of< runnable, Runnable >::type >::type* = 0 )
+    {
+        this->template insert< Runnable >( task, count );
+    }
+
+    template< class Function >
+    void insert( const Function& task,
+                 typename meta::enable_if<
+                 typename is_convertible< Function, function< void() >
+                 >::type >::type* = 0 )
+    {
+        insert( shared_ptr< runnable_function_wrapper >
+                ( new runnable_function_wrapper( task ) ));
+    }
+
 
     template< class Tag >
     void push_front( shared_ptr< runnable > task, std::size_t count = 1 )

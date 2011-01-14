@@ -210,6 +210,7 @@ std::size_t hopcroft_karp( const std::vector< std::pair< VL, VR > >& edges,
 }
 
 } // namespace graph
-} // namespace matching
+} // namespace zi
 
 #endif
+

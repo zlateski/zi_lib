@@ -34,15 +34,19 @@
 #  define ZI_VERIFY_T( what ) ( static_cast< void >( what ) )
 #  define ZI_VERIFY_0( what ) ( static_cast< void >( what ) )
 #
+#  define ZI_DEBUG_BLOCK() if ( false )
+#
 #else
 #
 #  define ZI_ASSERT( what )   assert( what )
 #  define ZI_ASSERT_T( what ) assert( what )
-#  define ZI_ASSERT_0( what ) assert( !( what ) )
+#  define ZI_ASSERT_0( what ) assert( !static_cast< bool >( what ) )
 #
 #  define ZI_VERIFY( what )   assert( what )
 #  define ZI_VERIFY_T( what ) assert( what )
-#  define ZI_VERIFY_0( what ) assert( !( what ) )
+#  define ZI_VERIFY_0( what ) assert( !static_cast< bool >( what ) )
+#
+#  define ZI_DEBUG_BLOCK() if ( true )
 #
 #endif
 #

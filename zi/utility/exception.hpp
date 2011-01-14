@@ -19,6 +19,7 @@
 #ifndef ZI_UTILITY_EXCEPTION_HPP
 #define ZI_UTILITY_EXCEPTION_HPP 1
 
+#include <zi/utility/string_printf.hpp>
 #include <exception>
 #include <string>
 
@@ -71,6 +72,11 @@ using exception_::exception;
     throw ::zi::exception( std::string( message ) +                     \
                            " [" + __FILE__ + ": " +                     \
                            ZI_EXCEPTION_STRINIGIFY( __LINE__ ) + "]" )
+
+#define ZI_THROWF( etype, fmt, ... )                                    \
+    throw etype ( ::zi::string_printf( fmt, ##__VA_ARGS__ ) +           \
+                  " [" + __FILE__ + ": " +                              \
+                  ZI_EXCEPTION_STRINIGIFY( __LINE__ ) + "]" )
 
 #define ZI_THROW_ON( cond, message )            \
     if ( cond ) ZI_THROW( message )

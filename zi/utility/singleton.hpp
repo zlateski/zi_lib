@@ -26,8 +26,10 @@ template< class Type > class singleton: private Type
 {
 private:
 
-    inline  singleton() {}
-    inline ~singleton() {}
+    singleton() {};
+    ~singleton() {};
+    singleton( const singleton< Type >& );
+    singleton& operator=( const singleton< Type >& );
 
 public:
 

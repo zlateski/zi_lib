@@ -25,108 +25,75 @@ namespace zi {
 namespace concurrency_ {
 namespace detail {
 
+#define ZI_DEFINE_HAS_MEMBER_XXX( member_name )                         \
+                                                                        \
+    template< class T, bool = is_class< T >::value >                    \
+    struct has_member_##member_name: false_type                         \
+    { };                                                                \
+                                                                        \
+    template< class T >                                                 \
+    struct has_member_##member_name< T, true >                          \
+    {                                                                   \
+        struct base { int member_name; };                               \
+        struct derrived: T, base { derrived(); };                       \
+                                                                        \
+        template< int base::* > struct test_struct;                     \
+                                                                        \
+        template< class Y >                                             \
+            static int  test( test_struct< &Y:: member_name >* );       \
+        template< class Y >                                             \
+            static char test( ... );                                    \
+                                                                        \
+        static const bool value = sizeof( test< derrived >(0) ) == 1;   \
+    };                                                                  \
+                                                                        \
+    template< class T, bool = has_member_##member_name< T >::value >    \
+    struct has_member_fn_##member_name: false_type                      \
+    { };                                                                \
+                                                                        \
+    template< class T >                                                 \
+    struct has_member_fn_##member_name< T, true >                       \
+    {                                                                   \
+        template< class Y > static char test( void ( Y::* )() const );  \
+        template< class Y > static int  test( Y );                      \
+                                                                        \
+        static const bool value =                                       \
+            sizeof( has_member_fn_##member_name< T >::test              \
+                    ( &T:: member_name ) ) == 1;                        \
+    }
 
-template< class MaybeMutex, bool = is_class< MaybeMutex >::value >
-struct has_member_lock
-{
-    static const bool value = false;
-};
 
-template< class MaybeMutex >
-struct has_member_lock< MaybeMutex, true >
-{
-    struct base
-    {
-        int lock;
-    };
 
-    struct derrived: MaybeMutex, base
-    {
-        derrived();
-    };
+ZI_DEFINE_HAS_MEMBER_XXX( lock   );
+ZI_DEFINE_HAS_MEMBER_XXX( unlock );
+ZI_DEFINE_HAS_MEMBER_XXX( acquire_read  );
+ZI_DEFINE_HAS_MEMBER_XXX( release_read  );
+ZI_DEFINE_HAS_MEMBER_XXX( acquire_write );
+ZI_DEFINE_HAS_MEMBER_XXX( release_write );
 
-    template< int base::* > struct test_struct;
-
-    template< class T > static int  test( test_struct< &T::lock >* );
-    template< class T > static char test( ... );
-
-    static const bool value = sizeof( test< derrived >(0) ) == 1;
-};
-
-template< class MaybeMutex, bool = is_class< MaybeMutex >::value >
-struct has_member_unlock
-{
-    static const bool value = false;
-};
-
-template< class MaybeMutex >
-struct has_member_unlock< MaybeMutex, true >
-{
-    struct base
-    {
-        int unlock;
-    };
-
-    struct derrived: MaybeMutex, base
-    {
-        derrived();
-    };
-
-    template< int base::* > struct test_struct;
-
-    template< class T > static int  test( test_struct< &T::unlock >* );
-    template< class T > static char test( ... );
-
-    static const bool value = sizeof( test< derrived >(0) ) == 1;
-};
-
-template< class Maybe, bool = has_member_lock< Maybe >::value >
-struct is_lockable
-{
-    static const bool value = false;
-};
-
-template< class Maybe >
-struct is_lockable< Maybe, true >
-{
-    template< class T >
-    static char test( void ( T::* )() const ); // note: member function
-
-    template< class T >
-    static int  test( T );                     // note: member type
-
-    static const bool value =
-        sizeof( is_lockable< Maybe >::test( &Maybe::lock ) ) == 1;
-};
-
-template< class Maybe, bool = has_member_unlock< Maybe >::value >
-struct is_unlockable
-{
-    static const bool value = false;
-};
-
-template< class Maybe >
-struct is_unlockable< Maybe, true >
-{
-    template< class T >
-    static char test( void ( T::* )() const ); // note: member function
-
-    template< class T >
-    static int  test( T );                     // note: member type
-
-    static const bool value =
-        sizeof( is_unlockable< Maybe >::test( &Maybe::unlock ) ) == 1;
-};
-
-template< class MaybeMutex >
+template< class T >
 struct is_mutex
 {
     static const bool value =
-        is_lockable  < MaybeMutex >::value &&
-        is_unlockable< MaybeMutex >::value;
+        has_member_fn_lock< T >::value &&
+        has_member_fn_unlock< T >::value;
+};
+
+template< class T >
+struct is_rwmutex
+{
+    static const bool value =
+        has_member_fn_acquire_read< T >::value &&
+        has_member_fn_release_read< T >::value &&
+        has_member_fn_acquire_write< T >::value &&
+        has_member_fn_release_write< T >::value;
 };
 
 } // namespace detail
+
+using detail::is_mutex;
+using detail::is_rwmutex;
+
 } // namespace concurrency_
 } // namespace zi
 

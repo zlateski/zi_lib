@@ -35,6 +35,90 @@ namespace zi {
 
 typedef concurrency_::rwmutex rwmutex;
 
+
+template< class Class >
+class class_rwmutex: private rwmutex
+{
+public:
+
+    typedef class_rwmutex< Class > type;
+
+private:
+
+    class_rwmutex(): rwmutex() {};
+    ~class_rwmutex() {};
+    class_rwmutex( const class_rwmutex< Class >& );
+    class_rwmutex& operator=( const class_rwmutex< Class >& );
+
+public:
+
+    static rwmutex& instance()
+    {
+        static class_rwmutex< Class > instance;
+        return instance;
+    }
+
+    static bool try_acquire_read()
+    {
+        return class_rwmutex< Class >::instance().try_acquire_read();
+    }
+
+    static bool try_acquire_write()
+    {
+        return class_rwmutex< Class >::instance().try_acquire_write();
+    }
+
+    static bool acquire_read()
+    {
+        return class_rwmutex< Class >::instance().acquire_read();
+    }
+
+    static bool acquire_write()
+    {
+        return class_rwmutex< Class >::instance().acquire_write();
+    }
+
+    static bool release_read()
+    {
+        return class_rwmutex< Class >::instance().release_read();
+    }
+
+    static bool release_write()
+    {
+        return class_rwmutex< Class >::instance().release_write();
+    }
+
+    class read_guard: non_copyable
+    {
+    public:
+        read_guard()
+        {
+            class_rwmutex< Class >::instance().acquire_read();
+        }
+
+        ~read_guard()
+        {
+            class_rwmutex< Class >::instance().release_read();
+        }
+    };
+
+    class write_guard: non_copyable
+    {
+    public:
+        write_guard()
+        {
+            class_rwmutex< Class >::instance().acquire_write();
+        }
+
+        ~write_guard()
+        {
+            class_rwmutex< Class >::instance().release_write();
+        }
+    };
+
+};
+
+
 } // namespace zi
 
 #endif

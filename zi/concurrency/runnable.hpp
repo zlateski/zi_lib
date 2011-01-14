@@ -101,28 +101,25 @@ protected:
 
 };
 
-struct runnable_function_wrapper: runnable
+struct runnable_function_wrapper: runnable, private function< void() >
 {
-private:
-    function< void() > f_;
-
-public:
-    runnable_function_wrapper( const function< void() >& f ): f_( f )
+    runnable_function_wrapper( function< void() > f )
+        : zi::function< void() >( f )
     {
     };
 
-    runnable_function_wrapper( const reference_wrapper< function< void() > >& f ):
-        f_( f.get() )
+    runnable_function_wrapper( const reference_wrapper< function< void() > >& f )
+        : zi::function< void() >( f.get() )
     {
     };
 
     void run()
     {
-        f_();
+        zi::function< void() >::operator() ();
     }
 };
 
-inline shared_ptr< runnable > run_fn( const function< void() >& f )
+inline shared_ptr< runnable > run_fn( function< void() > f )
 {
     return shared_ptr< runnable_function_wrapper >( new runnable_function_wrapper( f ) );
 }

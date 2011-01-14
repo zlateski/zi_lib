@@ -34,6 +34,18 @@
 #  define FOR_EACH_RANGE( it, begin, end )                              \
     for (__typeof__( begin ) it = ( begin ); it != ( end ); ++it)
 
+#  define FOR_EACH_ERASE_RANGE( it, begin, end, cnt )                   \
+    for (__typeof__( begin ) it = ( begin ); it != ( end ); it = ( cnt ).erase( it ) )
+
+#  define FOR_EACH_ERASE( it, cnt )                                     \
+    FOR_EACH_ERASE_RANGE( it, ( cnt ).begin(), ( cnt ).end(), cnt )
+
+#  define FOR_EACH_R_ERASE( it, cnt )                                   \
+    FOR_EACH_ERASE_RANGE( it, ( cnt ).rbegin(), ( cnt ).rend(), cnt )
+
+#  define REVERSE_FOR_EACH_ERASE FOR_EACH_R_ERASE
+
+
 #  ifdef ZI_USE_LOWERCASE_FOREACH
 #
 #    ifndef foreach

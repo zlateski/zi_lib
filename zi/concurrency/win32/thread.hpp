@@ -21,9 +21,13 @@
 
 #include <zi/concurrency/config.hpp>
 #include <zi/concurrency/runnable.hpp>
+#include <zi/concurrency/periodic_function.hpp>
 #include <zi/concurrency/thread_types.hpp>
 #include <zi/concurrency/detail/this_thread.hpp>
 #include <zi/concurrency/win32/detail/primitives.hpp>
+
+#include <zi/bits/type_traits.hpp>
+#include <zi/meta/enable_if.hpp>
 
 namespace zi {
 namespace concurrency_ {
@@ -62,7 +66,7 @@ public:
     {
     }
 
-    thread_tpl( shared_ptr< runnable > run ):
+    explicit thread_tpl( shared_ptr< runnable > run ):
         t_( new thread_info( run ) )
     {
         if ( Scoped )
@@ -124,13 +128,35 @@ public:
 
 struct thread: thread_tpl< false >
 {
-    thread(): thread_tpl< false >()
-    {
-    }
 
-    thread( shared_ptr< runnable > run ): thread_tpl< false >( run )
-    {
-    }
+    thread()
+        : thread_tpl< false >()
+    { }
+
+    explicit thread( const shared_ptr< runnable >& run )
+        : thread_tpl< false >( run )
+    { }
+
+    explicit thread( const periodic_function& pf )
+        : thread_tpl< false >( shared_ptr< runnable >( pf ) )
+    { }
+
+    template< class Runnable >
+    explicit thread( const shared_ptr< Runnable >& run,
+                     typename meta::enable_if<
+                     typename is_base_of< runnable, Runnable >::type >::type* = 0 )
+        : thread_tpl< false >( run )
+    { }
+
+    explicit thread( const function< void() >& f )
+        : thread_tpl< false >( shared_ptr< runnable_function_wrapper >
+                               ( new runnable_function_wrapper( f ) ))
+    { }
+
+    explicit thread( const reference_wrapper< function< void() > >& f )
+        : thread_tpl< false >( shared_ptr< runnable_function_wrapper >
+                               ( new runnable_function_wrapper( f ) ))
+    { }
 
 };
 

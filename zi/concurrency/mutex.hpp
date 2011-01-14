@@ -46,6 +46,66 @@ struct mutex: concurrency_::mutex_default
 typedef concurrency_::mutex_adaptive  adaptive_mutex;
 typedef concurrency_::mutex_recursive recursive_mutex;
 
+
+template< class Class, class MutexTag = concurrency_::mutex_default_tag >
+class class_mutex: private concurrency_::mutex_tpl< MutexTag >
+{
+public:
+
+    typedef class_mutex< Class > type;
+
+    typedef typename class_mutex< concurrency_::mutex_recursive_tag >::type recursive;
+    typedef typename class_mutex< concurrency_::mutex_adaptive_tag  >::type adaptive;
+
+private:
+
+    typedef concurrency_::mutex_tpl< MutexTag > base_mutex_type;
+
+    class_mutex(): base_mutex_type() {};
+    ~class_mutex() {};
+    class_mutex( const class_mutex< Class, MutexTag >& );
+    class_mutex& operator=( const class_mutex< Class, MutexTag >& );
+
+public:
+
+    static concurrency_::mutex_tpl< MutexTag >& instance()
+    {
+        static class_mutex< Class, MutexTag > instance;
+        return instance;
+    }
+
+    static bool try_lock()
+    {
+        return class_mutex< Class, MutexTag >::instance().try_lock();
+    }
+
+    static void lock()
+    {
+        class_mutex< Class, MutexTag >::lock();
+    }
+
+    static void unlock()
+    {
+        class_mutex< Class, MutexTag >::unlock();
+    }
+
+    class guard: non_copyable
+    {
+    public:
+        guard()
+        {
+            class_mutex< Class, MutexTag >::instance().lock();
+        }
+
+        ~guard()
+        {
+            class_mutex< Class, MutexTag >::instance().unlock();
+        }
+    };
+
+};
+
+
 } // namespace zi
 
 #endif

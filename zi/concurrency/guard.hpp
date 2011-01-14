@@ -28,8 +28,36 @@
 #include <zi/utility/non_copyable.hpp>
 #include <zi/utility/enable_if.hpp>
 
+#include <zi/bits/function.hpp>
+#include <zi/bits/bind.hpp>
+
 namespace zi {
 namespace concurrency_ {
+
+class lock_unlocker: function< void() >
+{
+public:
+    template< class Mutex >
+    explicit lock_unlocker( const Mutex& m,
+                            typename enable_if< is_mutex< Mutex >::value >::type* = 0 )
+        : function< void() >( ::zi::bind( &Mutex::unlock, &m ) )
+    {
+        m.lock();
+    }
+
+    template< class Mutex >
+    explicit lock_unlocker( const Mutex& m,
+                            typename enable_if< is_rwmutex< Mutex >::value >::type* = 0 )
+        : function< void() >( ::zi::bind( &Mutex::release_write, &m ) )
+    {
+        m.acquire_write();
+    }
+
+    void operator()() const
+    {
+        function< void() >::operator() ();
+    }
+};
 
 // forward declarations
 class condition_variable;
@@ -66,19 +94,30 @@ public:
 class guard: non_copyable
 {
 private:
-    guard_container_wrapper *gcw_;
+    //guard_container_wrapper *gcw_;
+    lock_unlocker unlocker_;
 
 public:
     template< class Guarded >
     explicit guard( const Guarded &m,
-                    typename enable_if< detail::is_mutex< Guarded >::value >::type* = 0 ):
-        gcw_( new guard_container< Guarded >( m ) )
+                    typename enable_if< is_mutex< Guarded >::value >::type* = 0 )
+        : unlocker_( m )
+//        gcw_( new guard_container< Guarded >( m ) )
+    {
+    }
+
+    template< class Guarded >
+    explicit guard( const Guarded &m,
+                    typename enable_if< is_rwmutex< Guarded >::value >::type* = 0 )
+        : unlocker_( m )
+//        gcw_( new guard_container< Guarded >( m ) )
     {
     }
 
     ~guard()
     {
-        delete gcw_;
+        //delete gcw_;
+        unlocker_();
     }
 
     friend class condition_variable;

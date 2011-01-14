@@ -28,6 +28,7 @@
 #  define ZI_HASH_EXPORT_NAMESPACE_END }
 #else
 #  if defined( ZI_USE_TR1 ) || defined( ZI_NO_BOOST )
+#    include <tr1/utility>
 #    include <tr1/functional>
 #    define ZI_HASH_NAMESPACE ::std::tr1
 #    define ZI_HASH_EXPORT_NAMESPACE_BEGIN namespace std { namespace tr1 {
