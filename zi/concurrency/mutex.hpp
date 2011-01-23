@@ -52,10 +52,10 @@ class class_mutex: private concurrency_::mutex_tpl< MutexTag >
 {
 public:
 
-    typedef class_mutex< Class > type;
+    typedef class_mutex< Class, MutexTag > type;
 
-    typedef typename class_mutex< concurrency_::mutex_recursive_tag >::type recursive;
-    typedef typename class_mutex< concurrency_::mutex_adaptive_tag  >::type adaptive;
+    typedef typename class_mutex< Class, concurrency_::mutex_recursive_tag >::type recursive;
+    typedef typename class_mutex< Class, concurrency_::mutex_adaptive_tag  >::type adaptive;
 
 private:
 

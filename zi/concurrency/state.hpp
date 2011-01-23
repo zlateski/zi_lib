@@ -41,16 +41,8 @@ private:
     mutex              m_      ;
     int                waiters_;
 
-public:
-
-    explicit state( state_type s = state_type() )
-        : state_( s ), cv_(), m_(), waiters_( 0 )
+    void set_to_nl( state_type s ) const
     {
-    }
-
-    void set_to( state_type s ) const
-    {
-        mutex::guard g( m_ );
         if ( state_ != s )
         {
             state_ = s;
@@ -63,6 +55,29 @@ public:
                 cv_.notify_all();
             }
         }
+    }
+
+public:
+
+    explicit state( state_type s = state_type() )
+        : state_( s ), cv_(), m_(), waiters_( 0 )
+    {
+    }
+
+    void set_to( state_type s ) const
+    {
+        mutex::guard g( m_ );
+        set_to_nl( s );
+    }
+
+    state_type compare_and_set_to( state_type expected, state_type s ) const
+    {
+        mutex::guard g( m_ );
+        if ( state_ == expected )
+        {
+            set_to_nl( s );
+        }
+        return state_;
     }
 
     void wait_for( state_type s ) const

@@ -25,6 +25,9 @@
 #include <zi/utility/enable_if.hpp>
 #include <zi/bits/cstdint.hpp>
 #include <zi/bits/type_traits.hpp>
+#include <zi/bits/function.hpp>
+#include <zi/meta/enable_if.hpp>
+
 
 namespace zi {
 
@@ -110,6 +113,30 @@ public:
         return lap_elapsed< int64_t >();
     }
 
+    class scoped: non_copyable
+    {
+    private:
+        int64_t                       start_ ;
+        zi::function< void(int64_t) > f_     ;
+
+    public:
+        scoped( const zi::function< void(int64_t) >& cb )
+            : start_( now::msec() ),
+              f_( cb )
+        { }
+
+        template< class T >
+        scoped( const T& cb,
+                typename meta::enable_if< typename is_convertible< T, zi::function< void(int64_t) > >::type >::type* = 0 )
+            : start_( now::msec() ),
+              f_( cb )
+        { }
+
+        ~scoped()
+        {
+            f_( now::msec() - start_ );
+        }
+    };
 };
 
 } // namespace zi

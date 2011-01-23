@@ -101,6 +101,11 @@ public:
         return n;
     }
 
+    inline T operator[]( const T& id ) const
+    {
+        return find_set( id );
+    }
+
     inline T join( const T& x, const T& y )
     {
         ZI_ASSERT( x < size_ && x >= 0 );
@@ -125,6 +130,11 @@ public:
 
         p_[ x ] = y;
         return y;
+    }
+
+    inline T operator()( const T& x, const T& y )
+    {
+        return join( x, y );
     }
 
     inline void clear()
