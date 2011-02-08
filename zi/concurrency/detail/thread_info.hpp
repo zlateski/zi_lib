@@ -80,13 +80,13 @@ protected:
 
     void lock_ptr_()
     {
-        ZI_VERIFY( !self_ );
+        ZI_ASSERT( !self_ );
         self_ = this->shared_from_this();
     }
 
     void unlock_ptr_()
     {
-        ZI_VERIFY( self_.get() == this );
+        ZI_ASSERT( self_.get() == this );
         self_.reset();
     }
 
@@ -139,9 +139,9 @@ public:
         id_     = id;
         handle_ = handle;
 
-        ZI_VERIFY( id_                 );
-        ZI_VERIFY( this == self_.get() );
-        ZI_VERIFY( runnable_           );
+        ZI_ASSERT( id_                 );
+        ZI_ASSERT( this == self_.get() );
+        ZI_ASSERT( runnable_           );
 
         state_ = STARTING;
 
@@ -206,7 +206,7 @@ public:
     shared_ptr< this_type > get_ptr()
     {
         mutex::guard g( mutex_ );
-        ZI_VERIFY( self_.get() == this );
+        ZI_ASSERT( self_.get() == this );
         return self_;
     }
 

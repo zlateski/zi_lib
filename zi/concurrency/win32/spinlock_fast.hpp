@@ -66,7 +66,7 @@ public:
 
     ~spinlock()
     {
-        ZI_VERIFY_0( lock_ );
+        ZI_ASSERT_0( lock_ );
     }
 
     inline bool try_lock() const

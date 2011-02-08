@@ -47,7 +47,7 @@ public:
     explicit semaphore( int64_t count = 0 ):
         credit_( count ), waiters_( 0 ), cv_(), m_()
     {
-        ZI_VERIFY( count >= 0 );
+        ZI_ASSERT( count >= 0 );
     }
 
     void acquire() const

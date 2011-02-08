@@ -67,7 +67,7 @@ public:
 
     virtual ~runnable()
     {
-        ZI_VERIFY( running_count_ == 0 );
+        ZI_ASSERT( running_count_ == 0 );
     }
 
     virtual void run() = 0;

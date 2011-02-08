@@ -86,8 +86,8 @@ public:
         broadcasting_( false ),
         waiters_( 0 )
     {
-        ZI_VERIFY( semaphore_  );
-        ZI_VERIFY( last_event_ );
+        ZI_ASSERT( semaphore_  );
+        ZI_ASSERT( last_event_ );
     }
 
     ~condition_variable()

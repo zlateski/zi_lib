@@ -102,7 +102,7 @@ public:
                                     ENTRY,
                                     static_cast< void * >( t_.get() )));
 
-        ZI_VERIFY( pt );
+        ZI_ASSERT( pt );
 
     }
 

@@ -53,8 +53,8 @@ public:
 
     ~recursive_mutex_tpl()
     {
-        ZI_VERIFY_0( count_ );
-        ZI_VERIFY_0( owner_ );
+        ZI_ASSERT_0( count_ );
+        ZI_ASSERT_0( owner_ );
     }
 
     inline bool try_lock() const
@@ -69,7 +69,7 @@ public:
 
         if ( mutex_.try_lock() )
         {
-            ZI_VERIFY_0( count_ );
+            ZI_ASSERT_0( count_ );
             ++count_;
             owner_ = me;
             return true;
@@ -89,7 +89,7 @@ public:
         else
         {
             mutex_.lock();
-            ZI_VERIFY_0( count_ );
+            ZI_ASSERT_0( count_ );
             ++count_;
             owner_ = me;
         }
@@ -97,7 +97,7 @@ public:
 
     inline void unlock() const
     {
-        ZI_VERIFY( owner_ == win32::GetCurrentThreadId() );
+        ZI_ASSERT( owner_ == win32::GetCurrentThreadId() );
 
         if ( --count_ == 0 )
         {

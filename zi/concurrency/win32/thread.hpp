@@ -94,8 +94,8 @@ public:
                                                (LPVOID)(t_.get()),
                                                0, &id );
 
-        ZI_VERIFY( h  );
-        ZI_VERIFY( id );
+        ZI_ASSERT( h  );
+        ZI_ASSERT( id );
     }
 
     operator bool() const

@@ -199,8 +199,8 @@ struct task_manager_impl
             return false;
         }
 
-        ZI_VERIFY( worker_count_ == 0 );
-        ZI_VERIFY( idle_workers_ == 0 );
+        ZI_ASSERT_0( worker_count_ );
+        ZI_ASSERT_0( idle_workers_ );
 
         state_ = STARTING;
 

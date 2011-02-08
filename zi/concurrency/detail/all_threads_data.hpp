@@ -70,8 +70,8 @@ struct all_threads_data
     ~all_threads_data()
     {
         join_all();
-        ZI_VERIFY_0( running_count_  );
-        ZI_VERIFY_0( threads_.size() );
+        ZI_ASSERT_0( running_count_  );
+        ZI_ASSERT_0( threads_.size() );
     }
 
     void join_all()
@@ -104,9 +104,7 @@ struct all_threads_data
         mutex::guard g( mutex_ );
 
 #ifdef ZI_DEBUG_THREADS0
-
         std::clog << "Thread: " << t->get_id() << " started\n";
-
 #endif
 
         threads_[ t->get_id() ] = t;

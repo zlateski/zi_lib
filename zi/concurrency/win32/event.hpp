@@ -40,7 +40,7 @@ public:
 
     event(): event_( win32::CreateEvent( 0, true, false, 0 ) )
     {
-        ZI_VERIFY( event_ );
+        ZI_ASSERT( event_ );
     }
 
     ~event()

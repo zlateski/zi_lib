@@ -44,7 +44,7 @@ public:
     default_mutex():
         handle_( win32::CreateMutex( NULL, false, NULL ) )
     {
-        ZI_VERIFY( handle_ != NULL );
+        ZI_ASSERT( handle_ != NULL );
     }
 
     ~default_mutex()
