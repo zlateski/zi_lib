@@ -125,10 +125,8 @@ public:
 
 };
 
-
 struct thread: thread_tpl< false >
 {
-
     thread()
         : thread_tpl< false >()
     { }
@@ -148,12 +146,10 @@ struct thread: thread_tpl< false >
         : thread_tpl< false >( run )
     { }
 
-    explicit thread( const function< void() >& f )
-        : thread_tpl< false >( shared_ptr< runnable_function_wrapper >
-                               ( new runnable_function_wrapper( f ) ))
-    { }
-
-    explicit thread( const reference_wrapper< function< void() > >& f )
+    template< class Function >
+    explicit thread( const Function& f,
+                     typename meta::enable_if<
+                     typename is_convertible< Function, function< void() > >::type >::type* = 0 )
         : thread_tpl< false >( shared_ptr< runnable_function_wrapper >
                                ( new runnable_function_wrapper( f ) ))
     { }

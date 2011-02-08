@@ -19,14 +19,6 @@
 #ifndef ZI_CONCURRENCY_WIN32_RWMUTEX_HPP
 #define ZI_CONCURRENCY_WIN32_RWMUTEX_HPP 1
 
-#include <zi/concurrency/config.hpp>
-
-namespace zi {
-namespace concurrency_ {
-
-class rwmutex {};
-
-} // namespace concurrency_
-} // namespace zi
+#include <zi/concurrency/detail/rwmutex_impl.hpp>
 
 #endif
