@@ -28,13 +28,11 @@
 #  include <zi/concurrency/win32/rwmutex.hpp>
 #
 #else
-#  error "add other"
+#  error "threading platform not supported"
 #endif
 
 namespace zi {
-
-typedef concurrency_::rwmutex rwmutex;
-
+typedef concurrency_::rwmutex_impl rwmutex;
 
 template< class Class >
 class class_rwmutex: private rwmutex
@@ -117,7 +115,6 @@ public:
     };
 
 };
-
 
 } // namespace zi
 
