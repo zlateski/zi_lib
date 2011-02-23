@@ -19,7 +19,7 @@
 // for now, extended type info is part of the serialization libraries
 // this could change in the future.
 #include <cstdarg>
-#include <cassert>
+#include <boost/assert.hpp>
 #include <cstddef> // NULL
 #include <boost/config.hpp>
 #include <boost/noncopyable.hpp>
@@ -80,7 +80,10 @@ public:
     bool operator!=(const extended_type_info &rhs) const {
         return !(operator==(rhs));
     }
-    static const extended_type_info * find(const char *key);
+    // note explicit "export" of static function to work around
+    // gcc 4.5 mingw error
+    static const extended_type_info *
+    find(const char *key);
     // for plugins
     virtual void * construct(unsigned int /*count*/ = 0, ...) const = 0;
     virtual void destroy(void const * const /*p*/) const = 0;

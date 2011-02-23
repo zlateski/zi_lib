@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga 2009. Distributed under the Boost
+// (C) Copyright Ion Gaztanaga 2009-2010. Distributed under the Boost
 // Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
@@ -27,7 +27,7 @@
 #include <boost/interprocess/interprocess_fwd.hpp>
 #include <boost/interprocess/exceptions.hpp>
 
-#include <boost/interprocess/detail/xsi_shared_memory.hpp>
+#include <boost/interprocess/xsi_shared_memory.hpp>
 #include <boost/interprocess/sync/xsi/xsi_named_mutex.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
@@ -45,13 +45,10 @@ namespace interprocess {
 class xsi_shared_memory_device
 {
    /// @cond
-   //Non-copyable and non-assignable
-   xsi_shared_memory_device(xsi_shared_memory_device &);
-   xsi_shared_memory_device &operator=(xsi_shared_memory_device &);
-   /// @endcond
+   BOOST_INTERPROCESS_MOVABLE_BUT_NOT_COPYABLE(xsi_shared_memory_file_wrapper)
+   /// @endcond 
 
    public:
-   BOOST_INTERPROCESS_ENABLE_MOVE_EMULATION(xsi_shared_memory_device)
 
    xsi_shared_memory_device();
 
@@ -197,9 +194,11 @@ inline void xsi_shared_memory_device::priv_obtain_index
    (mapped_region &reg, xsi_named_mutex &mut, std::string &path)
 {
    const char *const filename = "xsi_shm_emulation_file";
+   permissions p;
+   p.set_unrestricted();
    std::string xsi_shm_emulation_file_path;
-   detail::create_tmp_dir_and_get_filename(filename, xsi_shm_emulation_file_path);
-   detail::create_or_open_file(xsi_shm_emulation_file_path.c_str());
+   detail::create_tmp_and_clean_old_and_get_filename(filename, xsi_shm_emulation_file_path);
+   detail::create_or_open_file(xsi_shm_emulation_file_path.c_str(), read_write, p);
    const std::size_t MemSize = sizeof(info_t);
 
    xsi_shared_memory index_shm(open_or_create, xsi_shm_emulation_file_path.c_str(), 1, MemSize, 0666);

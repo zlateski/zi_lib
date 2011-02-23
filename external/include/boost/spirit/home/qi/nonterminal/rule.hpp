@@ -1,5 +1,5 @@
 /*=============================================================================
-    Copyright (c) 2001-2010 Joel de Guzman
+    Copyright (c) 2001-2011 Joel de Guzman
 
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -35,6 +35,7 @@
 #include <boost/spirit/home/qi/reference.hpp>
 #include <boost/spirit/home/qi/nonterminal/detail/parameterized.hpp>
 #include <boost/spirit/home/qi/nonterminal/detail/parser_binder.hpp>
+#include <boost/spirit/home/qi/nonterminal/nonterminal_fwd.hpp>
 #include <boost/spirit/home/qi/skip_over.hpp>
 
 #if defined(BOOST_MSVC)
@@ -63,12 +64,8 @@ namespace boost { namespace spirit { namespace qi
     using spirit::locals;
 
     template <
-        typename Iterator
-      , typename T1 = unused_type
-      , typename T2 = unused_type
-      , typename T3 = unused_type
-      , typename T4 = unused_type
-    >
+        typename Iterator, typename T1, typename T2, typename T3
+      , typename T4>
     struct rule
       : proto::extends<
             typename proto::terminal<
@@ -173,7 +170,7 @@ namespace boost { namespace spirit { namespace qi
             // from an uninitialized one. Did you mean to refer to the right
             // hand side rule instead of assigning from it? In this case you
             // should write lhs = rhs.alias();
-            BOOST_ASSERT(rhs.f);
+            BOOST_ASSERT(rhs.f && "Did you mean rhs.alias() instead of rhs?");
 
             f = rhs.f;
             name_ = rhs.name_;
@@ -368,20 +365,20 @@ namespace boost { namespace spirit { namespace qi
       , typename T3_, typename T4_, typename Expr>
     rule<OutputIterator_, T1_, T2_, T3_, T4_>& operator%=(
         rule<OutputIterator_, T1_, T2_, T3_, T4_>& r, Expr const& expr)
-	{
-		// Report invalid expression error as early as possible.
-		// If you got an error_invalid_expression error message here,
-		// then the expression (expr) is not a valid spirit qi expression.
-		BOOST_SPIRIT_ASSERT_MATCH(qi::domain, Expr);
+    {
+        // Report invalid expression error as early as possible.
+        // If you got an error_invalid_expression error message here,
+        // then the expression (expr) is not a valid spirit qi expression.
+        BOOST_SPIRIT_ASSERT_MATCH(qi::domain, Expr);
 
         typedef typename 
             rule<OutputIterator_, T1_, T2_, T3_, T4_>::encoding_modifier_type
         encoding_modifier_type;
 
         r.f = detail::bind_parser<mpl::true_>(
-			compile<qi::domain>(expr, encoding_modifier_type()));
-		return r;
-	}
+            compile<qi::domain>(expr, encoding_modifier_type()));
+        return r;
+    }
 
     template <typename Iterator_, typename T1_, typename T2_
       , typename T3_, typename T4_, typename Expr>
@@ -391,6 +388,22 @@ namespace boost { namespace spirit { namespace qi
         return r %= static_cast<Expr const&>(expr);
     }
 #endif
+}}}
+
+namespace boost { namespace spirit { namespace traits
+{
+    ///////////////////////////////////////////////////////////////////////////
+    template <
+        typename IteratorA, typename IteratorB, typename Attribute
+      , typename Context, typename T1, typename T2, typename T3, typename T4>
+    struct handles_container<
+        qi::rule<IteratorA, T1, T2, T3, T4>, Attribute, Context, IteratorB>
+      : traits::is_container<
+          typename attribute_of<
+              qi::rule<IteratorA, T1, T2, T3, T4>, Context, IteratorB
+          >::type
+        >
+    {};
 }}}
 
 #if defined(BOOST_MSVC)

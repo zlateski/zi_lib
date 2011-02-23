@@ -1,4 +1,4 @@
-//  Copyright (c) 2001-2010 Hartmut Kaiser
+//  Copyright (c) 2001-2011 Hartmut Kaiser
 //
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -154,8 +154,9 @@ namespace boost { namespace spirit { namespace karma
       : meta_create_string<T> {};
 
     template <typename T>
-    struct meta_create_impl<T
-          , typename enable_if<fusion::traits::is_sequence<T> >::type>
+    struct meta_create_impl<T, typename enable_if<
+                spirit::detail::is_fusion_sequence_but_not_proto_expr<T> 
+            >::type>
       : meta_create_sequence<T> {};
 
     template <typename T, typename Enable = void>
@@ -207,10 +208,23 @@ namespace boost { namespace spirit { namespace karma
         static type const& call() { return spirit::standard::char_; }
     };
     template <> 
+    struct meta_create<signed char> 
+    { 
+        typedef spirit::standard::char_type type;
+        static type const& call() { return spirit::standard::char_; }
+    };
+    template <> 
     struct meta_create<wchar_t> 
     { 
         typedef spirit::standard_wide::char_type type;
         static type const& call() { return spirit::standard_wide::char_; }
+    };
+
+    template <> 
+    struct meta_create<unsigned char> 
+    { 
+        typedef spirit::standard::char_type type;
+        static type const& call() { return spirit::standard::char_; }
     };
 
     // boolean generator

@@ -16,7 +16,7 @@
 #include <list>
 #include <vector>
 #include <map>
-#include <cassert>
+#include <boost/assert.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/graph_mutability_traits.hpp>
 #include <boost/graph/properties.hpp>
@@ -181,7 +181,7 @@ typedef typename Traits::traversal_category        traversal_category;
         vertex_descriptor u_local; bool in_subgraph;
         if (is_root()) return u_global;
         boost::tie(u_local, in_subgraph) = this->find_vertex(u_global);
-        assert(in_subgraph == true);
+        BOOST_ASSERT(in_subgraph == true);
         return u_local;
     }
 
@@ -345,8 +345,8 @@ typename subgraph<G>::vertex_descriptor
 add_vertex(typename subgraph<G>::vertex_descriptor u_global,
            subgraph<G>& g)
 {
-    assert(!g.is_root());
-    typename subgraph<G>::vertex_descriptor u_local, v_global, uu_global;
+    BOOST_ASSERT(!g.is_root());
+    typename subgraph<G>::vertex_descriptor u_local, v_global;
     typename subgraph<G>::edge_descriptor e_global;
 
     u_local = add_vertex(g.m_graph);
@@ -371,11 +371,13 @@ add_vertex(typename subgraph<G>::vertex_descriptor u_global,
         typename subgraph<G>::out_edge_iterator ei, ei_end;
         for(boost::tie(vi, vi_end) = vertices(r); vi != vi_end; ++vi) {
             v_global = *vi;
-            if(g.find_vertex(v_global).second)
+            if (v_global == u_global)
+                continue; // don't insert self loops twice!
+            if (!g.find_vertex(v_global).second)
+                continue; // not a subgraph vertex => try next one
             for(boost::tie(ei, ei_end) = out_edges(*vi, r); ei != ei_end; ++ei) {
                 e_global = *ei;
-                uu_global = target(e_global, r);
-                if(uu_global == u_global && g.find_vertex(v_global).second) {
+                if(target(e_global, r) == u_global) {
                     g.local_add_edge(g.global_to_local(v_global), u_local, e_global);
                 }
             }
@@ -677,17 +679,35 @@ remove_edge(typename subgraph<G>::edge_descriptor e, subgraph<G>& g)
     }
 }
 
-// TODO: This is wrong...
+// This is slow, but there may not be a good way to do it safely otherwise
 template <typename Predicate, typename G>
 void
-remove_edge_if(Predicate p, subgraph<G>& g)
-{ remove_edge_if(p, g.m_graph); }
+remove_edge_if(Predicate p, subgraph<G>& g) {
+  while (true) {
+    bool any_removed = false;
+    typedef typename subgraph<G>::edge_iterator ei_type;
+    for (std::pair<ei_type, ei_type> ep = edges(g);
+         ep.first != ep.second; ++ep.first) {
+      if (p(*ep.first)) {
+        any_removed = true;
+        remove_edge(*ep.first, g);
+        continue; /* Since iterators may be invalidated */
+      }
+    }
+    if (!any_removed) break;
+  }
+}
 
-// TODO: Ths is wrong
 template <typename G>
 void
-clear_vertex(typename subgraph<G>::vertex_descriptor v, subgraph<G>& g)
-{ clear_vertex(v, g.m_graph); }
+clear_vertex(typename subgraph<G>::vertex_descriptor v, subgraph<G>& g) {
+  while (true) {
+    typedef typename subgraph<G>::out_edge_iterator oei_type;
+    std::pair<oei_type, oei_type> p = out_edges(v, g);
+    if (p.first == p.second) break;
+    remove_edge(*p.first, g);
+  }
+}
 
 namespace detail {
     template <typename G>
@@ -727,10 +747,12 @@ add_vertex(subgraph<G>& g)
 }
 
 
+#if 0
 // TODO: Under Construction
 template <typename G>
 void remove_vertex(typename subgraph<G>::vertex_descriptor u, subgraph<G>& g)
-{ assert(false); }
+{ BOOST_ASSERT(false); }
+#endif
 
 //===========================================================================
 // Functions required by the PropertyGraph concept

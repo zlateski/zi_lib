@@ -310,7 +310,7 @@ class sgtree_impl
    {  return data_.node_plus_pred_.header_plus_alpha_.header_;  }
 
    static node_ptr uncast(const_node_ptr ptr)
-   {  return node_ptr(const_cast<node*>(detail::get_pointer(ptr)));  }
+   {  return node_ptr(const_cast<node*>(detail::boost_intrusive_get_pointer(ptr)));  }
 
    size_traits &priv_size_traits()
    {  return data_.node_plus_pred_.size_traits_;  }
@@ -621,11 +621,11 @@ class sgtree_impl
       node_ptr to_insert(get_real_value_traits().to_node_ptr(value));
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
-      this->priv_size_traits().increment();
       std::size_t max_tree_size = (std::size_t)data_.max_tree_size_;
       node_ptr p = node_algorithms::insert_equal_upper_bound
          (node_ptr(&priv_header()), to_insert, key_node_comp
          , (size_type)this->size(), this->get_h_alpha_func(), max_tree_size);
+      this->priv_size_traits().increment();
       data_.max_tree_size_ = (size_type)max_tree_size;
       return iterator(p, this);
    }
@@ -651,11 +651,11 @@ class sgtree_impl
       node_ptr to_insert(get_real_value_traits().to_node_ptr(value));
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
-      this->priv_size_traits().increment();
       std::size_t max_tree_size = (std::size_t)data_.max_tree_size_;
       node_ptr p = node_algorithms::insert_equal
          (node_ptr(&priv_header()), hint.pointed_node(), to_insert, key_node_comp
          , (std::size_t)this->size(), this->get_h_alpha_func(), max_tree_size);
+      this->priv_size_traits().increment();
       data_.max_tree_size_ = (size_type)max_tree_size;
       return iterator(p, this);
    }
@@ -862,11 +862,11 @@ class sgtree_impl
       node_ptr to_insert(get_real_value_traits().to_node_ptr(value));
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
-      this->priv_size_traits().increment();
       std::size_t max_tree_size = (std::size_t)data_.max_tree_size_;
       node_algorithms::insert_unique_commit
          ( node_ptr(&priv_header()), to_insert, commit_data
          , (std::size_t)this->size(), this->get_h_alpha_func(), max_tree_size);
+      this->priv_size_traits().increment();
       data_.max_tree_size_ = (size_type)max_tree_size;
       return iterator(to_insert, this);
    }
@@ -890,11 +890,11 @@ class sgtree_impl
       node_ptr to_insert(get_real_value_traits().to_node_ptr(value));
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
-      this->priv_size_traits().increment();
       std::size_t max_tree_size = (std::size_t)data_.max_tree_size_;
       node_ptr p = node_algorithms::insert_before
          ( node_ptr(&priv_header()), pos.pointed_node(), to_insert
          , (size_type)this->size(), this->get_h_alpha_func(), max_tree_size);
+      this->priv_size_traits().increment();
       data_.max_tree_size_ = (size_type)max_tree_size;
       return iterator(p, this);
    }
@@ -918,11 +918,11 @@ class sgtree_impl
       node_ptr to_insert(get_real_value_traits().to_node_ptr(value));
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
-      this->priv_size_traits().increment();
       std::size_t max_tree_size = (std::size_t)data_.max_tree_size_;
       node_algorithms::push_back
          ( node_ptr(&priv_header()), to_insert 
          , (size_type)this->size(), this->get_h_alpha_func(), max_tree_size);
+      this->priv_size_traits().increment();
       data_.max_tree_size_ = (size_type)max_tree_size;
    }
 
@@ -945,11 +945,11 @@ class sgtree_impl
       node_ptr to_insert(get_real_value_traits().to_node_ptr(value));
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
-      this->priv_size_traits().increment();
       std::size_t max_tree_size = (std::size_t)data_.max_tree_size_;
       node_algorithms::push_front
          ( node_ptr(&priv_header()), to_insert
          , (size_type)this->size(), this->get_h_alpha_func(), max_tree_size);
+      this->priv_size_traits().increment();
       data_.max_tree_size_ = (size_type)max_tree_size;
    }
 
@@ -1631,7 +1631,7 @@ class sgtree_impl
    static sgtree_impl &priv_container_from_end_iterator(const const_iterator &end_iterator)
    {
       header_plus_alpha *r = detail::parent_from_member<header_plus_alpha, node>
-         ( detail::get_pointer(end_iterator.pointed_node()), &header_plus_alpha::header_);
+         ( detail::boost_intrusive_get_pointer(end_iterator.pointed_node()), &header_plus_alpha::header_);
       node_plus_pred_t *n = detail::parent_from_member
          <node_plus_pred_t, header_plus_alpha>(r, &node_plus_pred_t::header_plus_alpha_);
       data_t *d = detail::parent_from_member<data_t, node_plus_pred_t>(n, &data_t::node_plus_pred_);

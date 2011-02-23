@@ -116,7 +116,7 @@ class treap_impl
       <pointer, node>::type                                          node_ptr;
    typedef typename boost::pointer_to_other
       <node_ptr, const node>::type                                   const_node_ptr;
-   typedef treap_algorithms<node_traits>                              node_algorithms;
+   typedef treap_algorithms<node_traits>                             node_algorithms;
 
    static const bool constant_time_size = Config::constant_time_size;
    static const bool stateful_value_traits = detail::is_stateful_value_traits<real_value_traits>::value;
@@ -184,7 +184,7 @@ class treap_impl
 
    static node_ptr uncast(const_node_ptr ptr)
    {
-      return node_ptr(const_cast<node*>(detail::get_pointer(ptr)));
+      return node_ptr(const_cast<node*>(detail::boost_intrusive_get_pointer(ptr)));
    }
 
    size_traits &priv_size_traits()
@@ -549,9 +549,10 @@ class treap_impl
       node_ptr to_insert(get_real_value_traits().to_node_ptr(value));
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
-      this->priv_size_traits().increment();
-      return iterator(node_algorithms::insert_equal_upper_bound
+      iterator ret(node_algorithms::insert_equal_upper_bound
          (node_ptr(&priv_header()), to_insert, key_node_comp, key_node_pcomp), this);
+      this->priv_size_traits().increment();
+      return ret;
    }
 
    //! <b>Requires</b>: value must be an lvalue, and "hint" must be
@@ -577,9 +578,10 @@ class treap_impl
       node_ptr to_insert(get_real_value_traits().to_node_ptr(value));
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
-      this->priv_size_traits().increment();
-      return iterator(node_algorithms::insert_equal
+      iterator ret (node_algorithms::insert_equal
          (node_ptr(&priv_header()), hint.pointed_node(), to_insert, key_node_comp, key_node_pcomp), this);
+      this->priv_size_traits().increment();
+      return ret;
    }
 
    //! <b>Requires</b>: Dereferencing iterator must yield an lvalue 
@@ -801,8 +803,8 @@ class treap_impl
       node_ptr to_insert(get_real_value_traits().to_node_ptr(value));
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
-      this->priv_size_traits().increment();
       node_algorithms::insert_unique_commit(node_ptr(&priv_header()), to_insert, commit_data);
+      this->priv_size_traits().increment();
       return iterator(to_insert, this);
    }
 
@@ -825,11 +827,12 @@ class treap_impl
       node_ptr to_insert(get_real_value_traits().to_node_ptr(value));
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
-      this->priv_size_traits().increment();
       detail::key_nodeptr_comp<priority_compare, treap_impl>
          pcomp(priv_pcomp(), this);
-      return iterator(node_algorithms::insert_before
+      iterator ret (node_algorithms::insert_before
          (node_ptr(&priv_header()), pos.pointed_node(), to_insert, pcomp), this);
+      this->priv_size_traits().increment();
+      return ret;
    }
 
    //! <b>Requires</b>: value must be an lvalue, and it must be no less
@@ -851,10 +854,10 @@ class treap_impl
       node_ptr to_insert(get_real_value_traits().to_node_ptr(value));
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
-      this->priv_size_traits().increment();
       detail::key_nodeptr_comp<priority_compare, treap_impl>
          pcomp(priv_pcomp(), this);
       node_algorithms::push_back(node_ptr(&priv_header()), to_insert, pcomp);
+      this->priv_size_traits().increment();
    }
 
    //! <b>Requires</b>: value must be an lvalue, and it must be no greater
@@ -876,10 +879,10 @@ class treap_impl
       node_ptr to_insert(get_real_value_traits().to_node_ptr(value));
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
-      this->priv_size_traits().increment();
       detail::key_nodeptr_comp<priority_compare, treap_impl>
          pcomp(priv_pcomp(), this);
       node_algorithms::push_front(node_ptr(&priv_header()), to_insert, pcomp);
+      this->priv_size_traits().increment();
    }
 
    //! <b>Effects</b>: Erases the element pointed to by pos. 
@@ -1482,7 +1485,7 @@ class treap_impl
    static treap_impl &priv_container_from_end_iterator(const const_iterator &end_iterator)
    {
       header_plus_size *r = detail::parent_from_member<header_plus_size, node>
-         ( detail::get_pointer(end_iterator.pointed_node()), &header_plus_size::header_);
+         ( detail::boost_intrusive_get_pointer(end_iterator.pointed_node()), &header_plus_size::header_);
       typename node_plus_pred_t::header_plus_priority_size *n =
          detail::parent_from_member
          < typename node_plus_pred_t::header_plus_priority_size

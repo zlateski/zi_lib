@@ -2,7 +2,7 @@
 // detail/socket_types.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2010 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2011 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -52,9 +52,10 @@
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <fcntl.h>
-# if defined(__hpux) && !defined(__HP_aCC)
+# if defined(__hpux)
 #  include <sys/time.h>
-# else
+# endif
+# if !defined(__hpux) || defined(__SELECT)
 #  include <sys/select.h>
 # endif
 # include <sys/socket.h>

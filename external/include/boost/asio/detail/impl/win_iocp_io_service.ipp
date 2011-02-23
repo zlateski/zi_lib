@@ -2,7 +2,7 @@
 // detail/impl/win_iocp_io_service.ipp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2010 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2011 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -447,6 +447,12 @@ void win_iocp_io_service::do_add_timer_queue(timer_queue_base& queue)
           boost::asio::error::get_system_category());
       boost::asio::detail::throw_error(ec, "timer");
     }
+
+    LARGE_INTEGER timeout;
+    timeout.QuadPart = -max_timeout_usec;
+    timeout.QuadPart *= 10;
+    ::SetWaitableTimer(waitable_timer_.handle,
+        &timeout, max_timeout_msec, 0, 0, FALSE);
   }
 
   if (!timer_thread_)
