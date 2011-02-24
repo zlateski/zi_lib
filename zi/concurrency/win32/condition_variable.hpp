@@ -28,6 +28,8 @@
 #include <zi/utility/non_copyable.hpp>
 #include <zi/utility/assert.hpp>
 
+#include <zi/meta/enable_if.hpp>
+
 #include <zi/time/now.hpp>
 #include <zi/time/interval.hpp>
 
@@ -120,16 +122,18 @@ public:
         return wait_( g.m_, static_cast< win32::dword >( ttl ) );
     }
 
-    template< class MutexTag, int64_t I >
+    template< class MutexTag, class T >
     bool timed_wait( const mutex_tpl< MutexTag > &mutex,
-                     const interval::detail::interval_tpl< I > &ttl ) const
+                     const T &ttl,
+                     typename meta::enable_if< is_time_interval< T > >::type* = 0 ) const
     {
         return wait_( mutex, static_cast< win32::dword >( ttl.msecs() ) );
     }
 
-    template< class Mutex, int64_t I >
+    template< class Mutex, class T >
     bool timed_wait( const mutex_guard< Mutex > &g,
-                     const interval::detail::interval_tpl< I > &ttl ) const
+                     const T &ttl,
+                     typename meta::enable_if< is_time_interval< T > >::type* = 0 ) const
     {
         return wait_( g.m_, static_cast< win32::dword >( ttl.msecs() ) );
     }

@@ -42,7 +42,7 @@
 #   pragma warning( push )
 #   pragma warning( disable : 4793 ) // complaint about native code generation
 #   pragma warning( disable : 4127 ) // "conditional expression is constant"
-#endif       
+#endif
 
 // Define BOOST_FUNCTION_STD_NS to the namespace that contains type_info.
 #ifdef BOOST_NO_STD_TYPEINFO
@@ -198,11 +198,11 @@ namespace boost {
       struct reference_manager
       {
         static inline void
-        manage(const function_buffer& in_buffer, function_buffer& out_buffer, 
+        manage(const function_buffer& in_buffer, function_buffer& out_buffer,
                functor_manager_operation_type op)
         {
           switch (op) {
-          case clone_functor_tag: 
+          case clone_functor_tag:
             out_buffer.obj_ref.obj_ptr = in_buffer.obj_ref.obj_ptr;
             return;
 
@@ -217,13 +217,13 @@ namespace boost {
 
           case check_functor_type_tag:
             {
-              const detail::sp_typeinfo& check_type 
+              const detail::sp_typeinfo& check_type
                 = *out_buffer.type.type;
 
               // Check whether we have the same type. We can add
               // cv-qualifiers, but we can't take them away.
               if (BOOST_FUNCTION_COMPARE_TYPE_ID(check_type, BOOST_SP_TYPEID(F))
-                  && (!in_buffer.obj_ref.is_const_qualified 
+                  && (!in_buffer.obj_ref.is_const_qualified
                       || out_buffer.type.const_qualified)
                   && (!in_buffer.obj_ref.is_volatile_qualified
                       || out_buffer.type.volatile_qualified))
@@ -250,9 +250,9 @@ namespace boost {
       struct function_allows_small_object_optimization
       {
         BOOST_STATIC_CONSTANT
-          (bool, 
+          (bool,
            value = ((sizeof(F) <= sizeof(function_buffer) &&
-                     (alignment_of<function_buffer>::value 
+                     (alignment_of<function_buffer>::value
                       % alignment_of<F>::value == 0))));
       };
 
@@ -264,7 +264,7 @@ namespace boost {
           A(a)
         {
         }
-        
+
         functor_wrapper(const functor_wrapper& f) :
           F(static_cast<const F&>(f)),
           A(static_cast<const A&>(f))
@@ -283,7 +283,7 @@ namespace boost {
 
         // Function pointers
         static inline void
-        manage_ptr(const function_buffer& in_buffer, function_buffer& out_buffer, 
+        manage_ptr(const function_buffer& in_buffer, function_buffer& out_buffer,
                 functor_manager_operation_type op)
         {
           if (op == clone_functor_tag)
@@ -294,7 +294,7 @@ namespace boost {
           } else if (op == destroy_functor_tag)
             out_buffer.func_ptr = 0;
           else if (op == check_functor_type_tag) {
-            const detail::sp_typeinfo& check_type 
+            const detail::sp_typeinfo& check_type
               = *out_buffer.type.type;
             if (BOOST_FUNCTION_COMPARE_TYPE_ID(check_type, BOOST_SP_TYPEID(Functor)))
               out_buffer.obj_ptr = &in_buffer.func_ptr;
@@ -309,22 +309,24 @@ namespace boost {
 
         // Function objects that fit in the small-object buffer.
         static inline void
-        manage_small(const function_buffer& in_buffer, function_buffer& out_buffer, 
+        manage_small(const function_buffer& in_buffer, function_buffer& out_buffer,
                 functor_manager_operation_type op)
         {
           if (op == clone_functor_tag || op == move_functor_tag) {
-            const functor_type* in_functor = 
+            const functor_type* in_functor =
               reinterpret_cast<const functor_type*>(&in_buffer.data);
             new ((void*)&out_buffer.data) functor_type(*in_functor);
 
             if (op == move_functor_tag) {
-              reinterpret_cast<functor_type*>(&in_buffer.data)->~Functor();
+                functor_type* f = reinterpret_cast<functor_type*>(&in_buffer.data);
+                f->~Functor();
             }
           } else if (op == destroy_functor_tag) {
             // Some compilers (Borland, vc6, ...) are unhappy with ~functor_type.
-            reinterpret_cast<functor_type*>(&out_buffer.data)->~Functor();
+              functor_type* f = reinterpret_cast<functor_type*>(&out_buffer.data);
+              f->~Functor();
           } else if (op == check_functor_type_tag) {
-            const detail::sp_typeinfo& check_type 
+            const detail::sp_typeinfo& check_type
               = *out_buffer.type.type;
             if (BOOST_FUNCTION_COMPARE_TYPE_ID(check_type, BOOST_SP_TYPEID(Functor)))
               out_buffer.obj_ptr = &in_buffer.data;
@@ -333,7 +335,7 @@ namespace boost {
           } else /* op == get_functor_type_tag */ {
             out_buffer.type.type = &BOOST_SP_TYPEID(Functor);
             out_buffer.type.const_qualified = false;
-            out_buffer.type.volatile_qualified = false;            
+            out_buffer.type.volatile_qualified = false;
           }
         }
       };
@@ -346,7 +348,7 @@ namespace boost {
 
         // Function pointers
         static inline void
-        manager(const function_buffer& in_buffer, function_buffer& out_buffer, 
+        manager(const function_buffer& in_buffer, function_buffer& out_buffer,
                 functor_manager_operation_type op, function_ptr_tag)
         {
           functor_manager_common<Functor>::manage_ptr(in_buffer,out_buffer,op);
@@ -354,15 +356,15 @@ namespace boost {
 
         // Function objects that fit in the small-object buffer.
         static inline void
-        manager(const function_buffer& in_buffer, function_buffer& out_buffer, 
+        manager(const function_buffer& in_buffer, function_buffer& out_buffer,
                 functor_manager_operation_type op, mpl::true_)
         {
           functor_manager_common<Functor>::manage_small(in_buffer,out_buffer,op);
         }
-        
+
         // Function objects that require heap allocation
         static inline void
-        manager(const function_buffer& in_buffer, function_buffer& out_buffer, 
+        manager(const function_buffer& in_buffer, function_buffer& out_buffer,
                 functor_manager_operation_type op, mpl::false_)
         {
           if (op == clone_functor_tag) {
@@ -400,7 +402,7 @@ namespace boost {
         // object can use the small-object optimization buffer or
         // whether we need to allocate it on the heap.
         static inline void
-        manager(const function_buffer& in_buffer, function_buffer& out_buffer, 
+        manager(const function_buffer& in_buffer, function_buffer& out_buffer,
                 functor_manager_operation_type op, function_obj_tag)
         {
           manager(in_buffer, out_buffer, op,
@@ -409,7 +411,7 @@ namespace boost {
 
         // For member pointers, we use the small-object optimization buffer.
         static inline void
-        manager(const function_buffer& in_buffer, function_buffer& out_buffer, 
+        manager(const function_buffer& in_buffer, function_buffer& out_buffer,
                 functor_manager_operation_type op, member_ptr_tag)
         {
           manager(in_buffer, out_buffer, op, mpl::true_());
@@ -419,7 +421,7 @@ namespace boost {
         /* Dispatch to an appropriate manager based on whether we have a
            function pointer or a function object pointer. */
         static inline void
-        manage(const function_buffer& in_buffer, function_buffer& out_buffer, 
+        manage(const function_buffer& in_buffer, function_buffer& out_buffer,
                functor_manager_operation_type op)
         {
           typedef typename get_function_tag<functor_type>::type tag_type;
@@ -445,7 +447,7 @@ namespace boost {
 
         // Function pointers
         static inline void
-        manager(const function_buffer& in_buffer, function_buffer& out_buffer, 
+        manager(const function_buffer& in_buffer, function_buffer& out_buffer,
                 functor_manager_operation_type op, function_ptr_tag)
         {
           functor_manager_common<Functor>::manage_ptr(in_buffer,out_buffer,op);
@@ -453,15 +455,15 @@ namespace boost {
 
         // Function objects that fit in the small-object buffer.
         static inline void
-        manager(const function_buffer& in_buffer, function_buffer& out_buffer, 
+        manager(const function_buffer& in_buffer, function_buffer& out_buffer,
                 functor_manager_operation_type op, mpl::true_)
         {
           functor_manager_common<Functor>::manage_small(in_buffer,out_buffer,op);
         }
-        
+
         // Function objects that require heap allocation
         static inline void
-        manager(const function_buffer& in_buffer, function_buffer& out_buffer, 
+        manager(const function_buffer& in_buffer, function_buffer& out_buffer,
                 functor_manager_operation_type op, mpl::false_)
         {
           typedef functor_wrapper<Functor,Allocator> functor_wrapper_type;
@@ -494,7 +496,7 @@ namespace boost {
             wrapper_allocator.deallocate(victim,1);
             out_buffer.obj_ptr = 0;
           } else if (op == check_functor_type_tag) {
-            const detail::sp_typeinfo& check_type 
+            const detail::sp_typeinfo& check_type
               = *out_buffer.type.type;
             if (BOOST_FUNCTION_COMPARE_TYPE_ID(check_type, BOOST_SP_TYPEID(Functor)))
               out_buffer.obj_ptr = in_buffer.obj_ptr;
@@ -511,7 +513,7 @@ namespace boost {
         // object can use the small-object optimization buffer or
         // whether we need to allocate it on the heap.
         static inline void
-        manager(const function_buffer& in_buffer, function_buffer& out_buffer, 
+        manager(const function_buffer& in_buffer, function_buffer& out_buffer,
                 functor_manager_operation_type op, function_obj_tag)
         {
           manager(in_buffer, out_buffer, op,
@@ -522,7 +524,7 @@ namespace boost {
         /* Dispatch to an appropriate manager based on whether we have a
            function pointer or a function object pointer. */
         static inline void
-        manage(const function_buffer& in_buffer, function_buffer& out_buffer, 
+        manage(const function_buffer& in_buffer, function_buffer& out_buffer,
                functor_manager_operation_type op)
         {
           typedef typename get_function_tag<functor_type>::type tag_type;
@@ -608,8 +610,8 @@ namespace boost {
        */
       struct vtable_base
       {
-        void (*manager)(const function_buffer& in_buffer, 
-                        function_buffer& out_buffer, 
+        void (*manager)(const function_buffer& in_buffer,
+                        function_buffer& out_buffer,
                         functor_manager_operation_type op);
       };
     } // end namespace function
@@ -649,7 +651,7 @@ public:
       type_result.type.type = &BOOST_SP_TYPEID(Functor);
       type_result.type.const_qualified = is_const<Functor>::value;
       type_result.type.volatile_qualified = is_volatile<Functor>::value;
-      get_vtable()->manager(functor, type_result, 
+      get_vtable()->manager(functor, type_result,
                       detail::function::check_functor_type_tag);
       return static_cast<Functor*>(type_result.obj_ptr);
     }
@@ -667,7 +669,7 @@ public:
       type_result.type.type = &BOOST_SP_TYPEID(Functor);
       type_result.type.const_qualified = true;
       type_result.type.volatile_qualified = is_volatile<Functor>::value;
-      get_vtable()->manager(functor, type_result, 
+      get_vtable()->manager(functor, type_result,
                       detail::function::check_functor_type_tag);
       // GCC 2.95.3 gets the CV qualifiers wrong here, so we
       // can't do the static_cast that we should do.
@@ -899,6 +901,6 @@ namespace detail {
 
 #if defined(BOOST_MSVC)
 #   pragma warning( pop )
-#endif       
+#endif
 
 #endif // BOOST_FUNCTION_BASE_HEADER

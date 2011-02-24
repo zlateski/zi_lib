@@ -31,6 +31,8 @@
 #include <zi/time/now.hpp>
 #include <zi/time/interval.hpp>
 
+#include <zi/meta/enable_if.hpp>
+
 #include <pthread.h>
 
 
@@ -83,18 +85,22 @@ public:
         return pthread_cond_timedwait( &cv_, &g.m_.mutex_, &ts ) == 0;
     }
 
-    template< class MutexTag, int64_t I >
+    template< class MutexTag, class T >
     bool timed_wait( const mutex_tpl< MutexTag > &mutex,
-                     const interval::detail::interval_tpl< I > &ttl ) const
+                     const T &ttl,
+                     typename meta::enable_if< is_time_interval< T > >::type* = 0 )
+        const
     {
         timespec ts;
         time_utils::nsec_to_ts( ts, now::nsec() + ttl.nsecs() );
         return pthread_cond_timedwait( &cv_, &mutex.mutex_, &ts ) == 0;
     }
 
-    template< class Mutex, int64_t I >
+    template< class Mutex, class T >
     bool timed_wait( const mutex_guard< Mutex > &g,
-                     const interval::detail::interval_tpl< I > &ttl ) const
+                     const T &ttl,
+                     typename meta::enable_if< is_time_interval< T > >::type* = 0 )
+        const
     {
         timespec ts;
         time_utils::nsec_to_ts( ts, now::nsec() + ttl.nsecs() );

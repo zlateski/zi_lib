@@ -21,6 +21,7 @@
 
 #include <zi/time/config.hpp>
 #include <zi/bits/cstdint.hpp>
+#include <zi/bits/type_traits.hpp>
 
 namespace zi {
 namespace interval {
@@ -28,6 +29,9 @@ namespace detail {
 
 template< int64_t Factor > struct interval_tpl
 {
+public:
+    typedef interval_tpl< Factor > type;
+
 private:
 
     int64_t value_;
@@ -45,11 +49,12 @@ public:
     {
     }
 
-    interval_tpl( int64_t v ): value_( Factor * v )
+    explicit interval_tpl( int64_t v ): value_( Factor * v )
     {
     }
 
-    template< int64_t F > interval_tpl( const interval_tpl< F > &r ):
+    template< int64_t F >
+    explicit interval_tpl( const interval_tpl< F > &r ):
         value_( r.value_ )
     {
     }
@@ -172,21 +177,31 @@ public:
 
 } // namespace detail
 
-typedef detail::interval_tpl< 1LL >              nsecs;
-typedef detail::interval_tpl< 1LL >              nanoseconds;
-typedef detail::interval_tpl< 1000LL >           usecs;
-typedef detail::interval_tpl< 1000LL >           microseconds;
-typedef detail::interval_tpl< 1000000LL >        msecs;
-typedef detail::interval_tpl< 1000000LL >        milliseconds;
-typedef detail::interval_tpl< 1000000000LL >     secs;
-typedef detail::interval_tpl< 1000000000LL >     seconds;
-typedef detail::interval_tpl< 60000000000LL >    mins;
-typedef detail::interval_tpl< 60000000000LL >    minutes;
-typedef detail::interval_tpl< 3600000000000LL >  hours;
-typedef detail::interval_tpl< 86400000000000LL > days;
+template< class T >
+struct is_time_interval: false_type {};
 
+template< int64_t I >
+struct is_time_interval< detail::interval_tpl< I > >: true_type {};
+
+#define ZI_TIME_DEFINE_TIME_INTERVAL_TYPE( len, name1, name2 )          \
+    typedef detail::interval_tpl< len > name1;                          \
+    typedef detail::interval_tpl< len > name2;                          \
+    template<> struct is_time_interval< name1 >: true_type {}
+
+ZI_TIME_DEFINE_TIME_INTERVAL_TYPE( 1LL, nsecs, nanoseconds );
+ZI_TIME_DEFINE_TIME_INTERVAL_TYPE( 1000LL, usecs, microseconds );
+ZI_TIME_DEFINE_TIME_INTERVAL_TYPE( 1000000LL, msecs, milliseconds );
+ZI_TIME_DEFINE_TIME_INTERVAL_TYPE( 1000000000LL, secs, seconds );
+ZI_TIME_DEFINE_TIME_INTERVAL_TYPE( 60000000000LL, mins, minutes );
+ZI_TIME_DEFINE_TIME_INTERVAL_TYPE( 3600000000000LL, hours, ___dummy_name_for_hours );
+ZI_TIME_DEFINE_TIME_INTERVAL_TYPE( 86400000000000LL, days, ___dummy_name_for_days );
+
+#undef ZI_TIME_DEFINE_TIME_INTERVAL_TYPE
 
 } // namespace interval
+
+using interval::is_time_interval;
+
 } // namespace zi
 
 #endif
