@@ -305,7 +305,7 @@ private:
         map_[ heap_[ y ] ] = y;
     }
 
-    void heap_up( uint32_t index )
+    uint32_t heap_up( uint32_t index )
     {
         uint32_t parent = ( index - 1 ) / 2;
         while ( index > 0 && compare_( value_extractor_( store_[ heap_[ index  ] ] ),
@@ -315,10 +315,15 @@ private:
             index = parent;
             parent = ( index - 1 ) / 2;
         }
+        return index;
     }
 
     void heap_down( uint32_t index )
     {
+        ZI_ASSERT( index==0 ||
+                   compare_(value_extractor_(store_[heap_[(index-1)/2]]),
+                            value_extractor_(store_[heap_[index]])));
+
         uint32_t child = index * 2 + 1;
         while ( child < size_ )
         {
@@ -408,8 +413,9 @@ private:
 
         if ( map_[ pos ] < size_ )
         {
-            const uint32_t hp = map_[ pos ];
+            uint32_t hp = map_[ pos ];
             swap_elements( map_[ pos ], size_ );
+            hp = heap_up(hp);
             heap_down( hp );
         }
         try_shrink();
