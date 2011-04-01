@@ -59,8 +59,8 @@ private:
 
     Allocator            alloc_   ;
     Container            keymap_  ;
-    uint32_t*            heap_    ;
-    uint32_t*            map_     ;
+    std::size_t*         heap_    ;
+    std::size_t*         map_     ;
     Type*                store_   ;
 
 private:
@@ -73,7 +73,7 @@ private:
 
             Type* new_store = alloc_.allocate( s );
 
-            for ( uint32_t i = 0; i < size_; ++i )
+            for ( std::size_t i = 0; i < size_; ++i )
             {
                 alloc_.construct( new_store + heap_[ i ], store_[ heap_[ i ] ] );
                 alloc_.destroy( store_ + heap_[ i ] );
@@ -83,17 +83,17 @@ private:
 
             store_ = new_store;
 
-            uint32_t* nheap = new uint32_t[ s ];
+            std::size_t* nheap = new std::size_t[ s ];
             std::copy( heap_, heap_ + reserved_, nheap );
             delete [] heap_;
             heap_ = nheap;
 
-            uint32_t* nmap = new uint32_t[ s ];
+            std::size_t* nmap = new std::size_t[ s ];
             std::copy( map_, map_ + reserved_, nmap );
             delete [] map_;
             map_ = nmap;
 
-            for ( uint32_t i = static_cast< uint32_t >( reserved_ ); i < s; ++i )
+            for ( std::size_t i = static_cast< std::size_t >( reserved_ ); i < s; ++i )
             {
                 heap_[ i ] = map_[ i ] = i;
             }
@@ -116,9 +116,9 @@ private:
 
             store_ = alloc_.allocate( s );
 
-            uint32_t si = 0;
+            std::size_t si = 0;
 
-            for ( uint32_t i = 0; i < size_; ++i )
+            for ( std::size_t i = 0; i < size_; ++i )
             {
                 if ( heap_[ i ] >= s )
                 {
@@ -142,7 +142,7 @@ private:
 
             }
 
-            for ( uint32_t i = size_; i < s; ++i )
+            for ( std::size_t i = size_; i < s; ++i )
             {
                 if ( heap_[ i ] >= s )
                 {
@@ -157,12 +157,12 @@ private:
 
             alloc_.deallocate( old, reserved_ );
 
-            uint32_t* nheap = new uint32_t[ s ];
+            std::size_t* nheap = new std::size_t[ s ];
             std::copy( heap_, heap_ + s, nheap );
             delete [] heap_;
             heap_ = nheap;
 
-            uint32_t* nmap = new uint32_t[ s ];
+            std::size_t* nmap = new std::size_t[ s ];
             std::copy( map_, map_ + s, nmap );
             delete [] map_;
             map_ = nmap;
@@ -192,11 +192,11 @@ public:
         {
             reserved_ = 16;
         }
-        heap_ = new uint32_t[ reserved_ ];
-        map_  = new uint32_t[ reserved_ ];
+        heap_ = new std::size_t[ reserved_ ];
+        map_  = new std::size_t[ reserved_ ];
         store_ = alloc_.allocate( reserved_ );
 
-        for ( uint32_t i = 0; i < reserved_; ++i )
+        for ( std::size_t i = 0; i < reserved_; ++i )
         {
             heap_[ i ] = map_[ i ] = i;
         }
@@ -204,7 +204,7 @@ public:
 
     ~binary_heap_impl()
     {
-        for ( uint32_t i = 0; i < size_; ++i )
+        for ( std::size_t i = 0; i < size_; ++i )
         {
             alloc_.destroy( store_ + heap_[ i ] );
         }
@@ -298,16 +298,16 @@ public:
 
 private:
 
-    void swap_elements( uint32_t x, uint32_t y )
+    void swap_elements( std::size_t x, std::size_t y )
     {
         std::swap( heap_[ x ], heap_[ y ] );
         map_[ heap_[ x ] ] = x;
         map_[ heap_[ y ] ] = y;
     }
 
-    uint32_t heap_up( uint32_t index )
+    std::size_t heap_up( std::size_t index )
     {
-        uint32_t parent = ( index - 1 ) / 2;
+        std::size_t parent = ( index - 1 ) / 2;
         while ( index > 0 && compare_( value_extractor_( store_[ heap_[ index  ] ] ),
                                        value_extractor_( store_[ heap_[ parent ] ] )))
         {
@@ -318,13 +318,9 @@ private:
         return index;
     }
 
-    void heap_down( uint32_t index )
+    void heap_down( std::size_t index )
     {
-        ZI_ASSERT( index==0 ||
-                   compare_(value_extractor_(store_[heap_[(index-1)/2]]),
-                            value_extractor_(store_[heap_[index]])));
-
-        uint32_t child = index * 2 + 1;
+        std::size_t child = index * 2 + 1;
         while ( child < size_ )
         {
             if ( child + 1 < size_ &&
@@ -357,7 +353,7 @@ private:
 
         ZI_ASSERT( map_[ heap_[ size_ ] ] == size_ );
 
-        heap_up( static_cast< uint32_t >( size_ ) );
+        heap_up( static_cast< std::size_t >( size_ ) );
 
         ++size_;
         try_grow();
@@ -365,7 +361,7 @@ private:
 
     void clear_()
     {
-        for ( uint32_t i = 0; i < size_; ++i )
+        for ( std::size_t i = 0; i < size_; ++i )
         {
             alloc_.destroy( store_ + heap_[ i ] );
         }
@@ -378,13 +374,13 @@ private:
             delete [] heap_;
             delete [] map_ ;
 
-            heap_ = new uint32_t[ 16 ];
-            map_  = new uint32_t[ 16 ];
+            heap_ = new std::size_t[ 16 ];
+            map_  = new std::size_t[ 16 ];
 
             reserved_ = 16;
             store_ = alloc_.allocate( reserved_ );
 
-            for ( uint32_t i = 0; i < reserved_; ++i )
+            for ( std::size_t i = 0; i < reserved_; ++i )
             {
                 heap_[ i ] = map_[ i ] = i;
             }
@@ -404,7 +400,7 @@ private:
         erase_at_( keymap_[ k ] );
     }
 
-    void erase_at_( const uint32_t pos )
+    void erase_at_( const std::size_t pos )
     {
         ZI_VERIFY( keymap_.erase( key_extractor_( store_[ pos ] )));
 
@@ -413,7 +409,7 @@ private:
 
         if ( map_[ pos ] < size_ )
         {
-            uint32_t hp = map_[ pos ];
+            std::size_t hp = map_[ pos ];
             swap_elements( map_[ pos ], size_ );
             hp = heap_up(hp);
             heap_down( hp );
