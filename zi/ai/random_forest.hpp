@@ -28,6 +28,9 @@
 
 #include <cstddef>
 #include <cmath>
+#include <iostream>
+#include <sstream>
+#include <fstream>
 
 namespace zi {
 namespace ai {
@@ -176,6 +179,43 @@ public:
     {
         return eval( pattern );
     }
+
+    std::string to_string() const
+    {
+        std::ostringstream iss;
+        if ( trees_.size() )
+        {
+            FOR_EACH( it, trees_ )
+            {
+                iss << it->to_string() << "\n";
+            }
+        }
+        return iss.str();
+    }
+
+    void dump() const
+    {
+        if ( trees_.size() )
+        {
+            FOR_EACH( it, trees_ )
+            {
+                std::cout << it->to_string() << "\n";
+            }
+        }
+    }
+
+    void dump_to_file( std::ofstream& ofs ) const
+    {
+        if ( trees_.size() )
+        {
+            FOR_EACH( it, trees_ )
+            {
+                ofs << it->to_string() << "\n";
+            }
+        }
+    }
+
+
 
 };
 

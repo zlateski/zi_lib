@@ -28,6 +28,9 @@
 #include <zi/ai/detail/mmdt_splitter.hpp>
 
 #include <vector>
+#include <string>
+#include <sstream>
+#include <boost/lexical_cast.hpp>
 
 namespace zi {
 namespace ai {
@@ -50,6 +53,8 @@ private:
         {
             return eval( t );
         }
+
+        virtual std::string to_string() const = 0;
     };
 
     class leaf_node: public node_base
@@ -73,6 +78,10 @@ private:
             return probability_;
         }
 
+        std::string to_string() const
+        {
+            return boost::lexical_cast<std::string>(probability_);
+        }
     };
 
     class interior_node: public node_base
@@ -190,7 +199,23 @@ private:
             }
         }
 
+        std::string to_string() const
+        {
+            if ( split_fn_.is_dummy() )
+            {
+                return left_->to_string();
+            }
+            else
+            {
+                std::ostringstream iss;
+                iss << "( " << boost::lexical_cast<std::string>(split_fn_.get_index()) << " " <<
+                    boost::lexical_cast<std::string>(split_fn_.get_threshold()) << " " <<
+                    left_->to_string() << " " << right_->to_string() << " )";
+                return iss.str();
+            }
+        }
     };
+
 
     shared_ptr< node_base > root_node_;
 
@@ -250,6 +275,11 @@ public:
     inline uint32_t depth() const
     {
         return root_node_->depth();
+    }
+
+    std::string to_string() const
+    {
+        return root_node_->to_string();
     }
 
 };

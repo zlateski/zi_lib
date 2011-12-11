@@ -59,6 +59,21 @@ public:
                 return p[ index_ ] < threshold_;
             }
         }
+
+        uint32_t get_index() const
+        {
+            return index_;
+        }
+
+        T get_threshold() const
+        {
+            return threshold_;
+        }
+
+        bool is_dummy() const
+        {
+            return all_same_;
+        }
     };
 
     split_fn get_split_fn( const std::vector< std::vector< T > >& patterns,
