@@ -207,7 +207,7 @@ private:
 
         void dump_to_file( std::ofstream& ofs ) const
         {
-            if ( split_fn_.is_dummy() )
+            if ( split_fn_.is_dummy() || ( !right_) )
             {
                 left_->dump_to_file( ofs );
             }
