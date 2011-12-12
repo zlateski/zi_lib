@@ -210,12 +210,11 @@ public:
         {
             FOR_EACH( it, trees_ )
             {
-                ofs << it->to_string() << "\n";
+                it->dump_to_file( ofs );
+                ofs << "\n";
             }
         }
     }
-
-
 
 };
 

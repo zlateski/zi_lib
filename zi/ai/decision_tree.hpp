@@ -55,6 +55,7 @@ private:
         }
 
         virtual std::string to_string() const = 0;
+        virtual void dump_to_file( std::ofstream& ) const = 0;
     };
 
     class leaf_node: public node_base
@@ -81,6 +82,11 @@ private:
         std::string to_string() const
         {
             return boost::lexical_cast<std::string>(probability_);
+        }
+
+        void dump_to_file( std::ofstream& ofs ) const
+        {
+            ofs << probability_;
         }
     };
 
@@ -199,6 +205,22 @@ private:
             }
         }
 
+        void dump_to_file( std::ofstream& ofs ) const
+        {
+            if ( split_fn_.is_dummy() )
+            {
+                left_->dump_to_file( ofs );
+            }
+            else
+            {
+                ofs << "( " << split_fn_.get_index() << " " << split_fn_.get_threshold() << " ";
+                left_->dump_to_file(ofs);
+                ofs << " ";
+                right_->dump_to_file(ofs);
+                ofs << " )";
+            }
+        }
+
         std::string to_string() const
         {
             if ( split_fn_.is_dummy() )
@@ -281,6 +303,12 @@ public:
     {
         return root_node_->to_string();
     }
+
+    void dump_to_file( std::ofstream& ofs ) const
+    {
+        root_node_->dump_to_file(ofs);
+    }
+
 
 };
 
