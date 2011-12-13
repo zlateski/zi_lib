@@ -209,15 +209,15 @@ private:
         {
             if ( split_fn_.is_dummy() || ( !right_) )
             {
+                ofs << "v ";
                 left_->dump_to_file( ofs );
             }
             else
             {
-                ofs << "( " << split_fn_.get_index() << " " << split_fn_.get_threshold() << " ";
+                ofs << "c " << split_fn_.get_index() << " " << split_fn_.get_threshold() << " ";
                 left_->dump_to_file(ofs);
                 ofs << " ";
                 right_->dump_to_file(ofs);
-                ofs << " )";
             }
         }
 
