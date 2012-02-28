@@ -27,7 +27,7 @@
 #include <zi/bits/type_traits.hpp>
 #include <zi/bits/function.hpp>
 #include <zi/meta/enable_if.hpp>
-
+#include <zi/utility/non_copyable.hpp>
 
 namespace zi {
 
