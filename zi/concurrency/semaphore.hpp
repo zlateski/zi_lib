@@ -50,19 +50,30 @@ public:
         ZI_ASSERT( count >= 0 );
     }
 
-    void acquire() const
+    void set( int64_t n ) const
     {
         mutex::guard g( m_ );
 
-        while ( credit_ <= 0 )
+        credit_ = n;
+
+        if( n )
+        {
+            cv_.notify_one();
+        }
+    }
+
+    void acquire( int64_t n = 1 ) const
+    {
+        mutex::guard g( m_ );
+
+        while ( credit_ < n )
         {
             ++waiters_;
             cv_.wait( m_ );
             --waiters_;
         }
 
-        --credit_;
-
+        credit_ -= n;
     }
 
     bool timed_acquire( int64_t ttl ) const
