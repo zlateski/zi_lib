@@ -31,6 +31,7 @@
 #include <zi/concurrency/semaphore.hpp>
 #include <zi/concurrency/spinlock.hpp>
 #include <zi/concurrency/task_manager.hpp>
+#include <zi/concurrency/priority_task_manager.hpp>
 #include <zi/concurrency/thread.hpp>
 
 #endif

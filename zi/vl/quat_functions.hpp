@@ -110,7 +110,7 @@ quat< T > inv( const quat< T >& q )
     quat< T > tmp( q );
     if ( !static_cast< bool >( invert( tmp ) ) )
     {
-        throw ::std::runtime_error( "quat<>: inverting singular quaternion" );
+        //throw ::std::runtime_error( "quat<>: inverting singular quaternion" );
     }
     return tmp;
 }

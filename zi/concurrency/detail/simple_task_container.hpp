@@ -27,7 +27,19 @@ namespace zi {
 namespace concurrency_ {
 namespace detail {
 
-typedef std::deque< shared_ptr< runnable > > simple_task_container;
+class simple_task_container: public std::deque< shared_ptr<runnable> >
+{
+private:
+    typedef std::deque< shared_ptr<runnable> > super_type;
+
+public:
+    shared_ptr<runnable> get_pop_front()
+    {
+        shared_ptr<runnable> ret = super_type::front();
+        super_type::pop_front();
+        return ret;
+    }
+};
 
 } // namespace detail
 } // namespace concurrency_

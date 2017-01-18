@@ -35,27 +35,27 @@ namespace priority {
 
 struct highest
 {
-    static const int64_t value = 20;
+    static const int64_t value = 8;
 };
 
 struct high
 {
-    static const int64_t value = 10;
+    static const int64_t value = 6;
 };
 
 struct normal
 {
-    static const int64_t value = 0;
+    static const int64_t value = 4;
 };
 
 struct low
 {
-    static const int64_t value = -10;
+    static const int64_t value = 2;
 };
 
 struct lowest
 {
-    static const int64_t value = -20;
+    static const int64_t value = 0;
 };
 
 template< int64_t Value >
@@ -101,6 +101,13 @@ public:
         return queue_.begin()->second;
     }
 
+    shared_ptr< runnable > get_pop_front()
+    {
+        shared_ptr<runnable> ret = queue_.begin()->second;
+        queue_.erase( queue_.begin() );
+        return ret;
+    }
+
     void pop_front()
     {
         queue_.erase( queue_.begin() );
@@ -109,7 +116,7 @@ public:
     template< class Priority >
     void push_front( shared_ptr< runnable > task )
     {
-        queue_.insert( std::make_pair( - ( Priority::value << 48 ) + ( ++counter_ ), task ) );
+        queue_.insert( std::make_pair( - ( Priority::value << 56 ) - ( ++counter_ ), task ) );
     }
 
     template< class Priority >

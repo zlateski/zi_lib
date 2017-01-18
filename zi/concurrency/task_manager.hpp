@@ -22,6 +22,7 @@
 #include <zi/concurrency/detail/task_manager_impl.hpp>
 #include <zi/concurrency/detail/simple_task_container.hpp>
 #include <zi/concurrency/detail/priority_task_container.hpp>
+#include <zi/concurrency/detail/randomized_task_container.hpp>
 
 #include <zi/bits/type_traits.hpp>
 #include <zi/meta/enable_if.hpp>
@@ -254,13 +255,23 @@ public:
 
 namespace task_manager {
 
-typedef concurrency_::task_manager_tpl< concurrency_::detail::simple_task_container >   simple     ;
-typedef concurrency_::task_manager_tpl< concurrency_::detail::simple_task_container >   deque      ;
-typedef concurrency_::task_manager_tpl< concurrency_::detail::priority_task_container > prioritized;
+typedef concurrency_::task_manager_tpl<concurrency_::detail::simple_task_container>     simple     ;
+typedef concurrency_::task_manager_tpl<concurrency_::detail::simple_task_container>     deque      ;
+//typedef concurrency_::task_manager_tpl<concurrency_::detail::priority_task_container>   prioritized;
+typedef concurrency_::task_manager_tpl<concurrency_::detail::randomized_task_container> randomized ;
+typedef concurrency_::task_manager_tpl<concurrency_::detail::randomized_task_container> random     ;
 
 } // namespace task_manager
+
+typedef task_manager::simple        simple_task_manager     ;
+typedef task_manager::deque         deque_task_manager      ;
+//typedef task_manager::prioritized   prioritized_task_manager;
+//typedef task_manager::prioritized   priority_task_manager   ;
+typedef task_manager::randomized    randomized_task_manager ;
+typedef task_manager::randomized    random_task_manager     ;
 
 } // namespace zi
 
 #endif
+
 

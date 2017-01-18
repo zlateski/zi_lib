@@ -27,7 +27,7 @@ namespace vl {
 template< class T, std::size_t N >
 inline
 typename detail::enable_if< is_integral< T >, T >::type
-invert( mat< T, N >& m )
+invert( mat< T, N >& )
 {
     return 0;
 }
@@ -275,7 +275,7 @@ inv( const mat< T, N >& rhs )
 
     if ( !static_cast< bool >( invert( res ) ) )
     {
-        throw ::std::runtime_error( "mat<>: inverting singular matrix" );
+        //throw ::std::runtime_error( "mat<>: inverting singular matrix" );
     }
 
     return res;

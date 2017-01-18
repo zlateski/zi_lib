@@ -28,6 +28,7 @@
 #include <zi/bits/enable_shared_from_this.hpp>
 #include <zi/bits/shared_ptr.hpp>
 #include <zi/utility/assert.hpp>
+#include <zi/system/system.hpp>
 
 #include <cstddef>
 #include <algorithm>
@@ -64,9 +65,16 @@ struct task_manager_impl
 
     TaskContainer tasks_;
 
-    task_manager_impl( std::size_t worker_limit, std::size_t max_size ) :
+public:
+
+    static std::size_t get_concurrency()
+    {
+        return ::zi::system::cpu_count;
+    }
+
+    explicit task_manager_impl( std::size_t worker_limit = 0, std::size_t max_size = 0 ) :
         worker_count_( 0 ),
-        worker_limit_( worker_limit ),
+        worker_limit_( worker_limit > 0 ? worker_limit : ::zi::system::cpu_count ),
         idle_workers_( 0 ),
         active_workers_( 0 ),
         max_size_( max_size ),
@@ -325,8 +333,7 @@ struct task_manager_impl
                 {
                     if ( tasks_.size() )
                     {
-                        task = tasks_.front();
-                        tasks_.pop_front();
+                        task = tasks_.get_pop_front();
                     }
                 }
                 else

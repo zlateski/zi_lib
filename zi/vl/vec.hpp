@@ -30,12 +30,22 @@
 #include <zi/bits/type_traits.hpp>
 
 #include <limits>
+#include <initializer_list>
+#include <type_traits>
 #include <cstddef>
 #include <stdexcept>
 #include <algorithm>
 
 namespace zi {
 namespace vl {
+
+struct load_tag {};
+
+namespace {
+load_tag load;
+}
+
+inline void ____use_load_tag() { static_cast<void>(load); }
 
 template< class T, std::size_t N >
 class vec;
@@ -69,6 +79,24 @@ public:
     // ---------------------------------------------------------------------
     //
 
+    // c++11 initializer list
+    template<typename V>
+    vec( std::initializer_list<V> v )
+    {
+        ZI_ASSERT( N == v.size() );
+        std::copy(v.begin(), v.end(), d);
+    }
+
+    template<typename O>
+    vec( load_tag, O const * data,
+         typename std::enable_if< std::is_convertible<O,T>::value, void*>::type = 0 )
+    {
+        for ( size_type i = 0; i < N; ++i )
+        {
+            d[ i ] = data[ i ];
+        }
+    }
+
     explicit vec( const T& rcp = T() )
     {
         std::fill_n( begin(), N, rcp );
@@ -96,6 +124,27 @@ public:
         d[ 1 ] = p1;
         d[ 2 ] = p2;
         d[ 3 ] = p3;
+    }
+
+    explicit vec( const T& p0, const T& p1, const T& p2, const T& p3, const T& p4 )
+    {
+        ZI_ASSERT( N == 5 && "ctor_only_avaible_vec_of_size_5" );
+        d[ 0 ] = p0;
+        d[ 1 ] = p1;
+        d[ 2 ] = p2;
+        d[ 3 ] = p3;
+        d[ 4 ] = p4;
+    }
+
+    explicit vec( const T& p0, const T& p1, const T& p2, const T& p3, const T& p4, const T& p5 )
+    {
+        ZI_ASSERT( N == 6 && "ctor_only_avaible_vec_of_size_6" );
+        d[ 0 ] = p0;
+        d[ 1 ] = p1;
+        d[ 2 ] = p2;
+        d[ 3 ] = p3;
+        d[ 4 ] = p4;
+        d[ 5 ] = p5;
     }
 
     template< class X >
@@ -478,7 +527,7 @@ public:
     {
         if ( i >= N )
         {
-            throw std::out_of_range( "vec<>: index out of range" );
+            //throw std::out_of_range( "vec<>: index out of range" );
         }
     }
 
@@ -712,6 +761,19 @@ ZI_VL_INLINE_BINARY_OPERATOR( / )
 #undef ZI_VL_INLINE_BINARY_OPERATOR_TYPE_SCALAR
 
 template< class T, std::size_t N >
+inline typename vec< T, N >::type
+operator %( const vec< T, N >& lhs, const vec< T, N >& rhs )
+{
+    vec< T, N > res( lhs );
+    for ( std::size_t i = 0; i < N; ++i )
+    {
+        res[ i ] %= rhs.elem( i );
+    }
+    return res;
+}
+
+
+template< class T, std::size_t N >
 inline
 vec< T, N > operator+( const vec< T, N >& rhs )
 {
@@ -735,12 +797,12 @@ template< class T, std::size_t N, class CharT, class Traits >
 operator<<( ::std::basic_ostream< CharT, Traits >& os,
             const vec< T, N >& v )
 {
-    os << "[ " << v[ 0 ];
+    os << v[ 0 ];
     for ( std::size_t i = 1; i < N; ++i )
     {
-        os << ", " << v[ i ];
+        os << "," << v[ i ];
     }
-    return os << " ]";
+    return os;
 }
 
 template< std::size_t I, class T, std::size_t N >

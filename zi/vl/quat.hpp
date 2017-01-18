@@ -116,7 +116,7 @@ public:
         d[ 3 ] = v.at( 3 );
     }
 
-    template< class O, std::size_t N >
+    template< std::size_t N, class O = void >
     explicit quat( const mat< T, N >& m,
                    typename detail::enable_if_c< ( N > 2 ), O >::type* = 0 )
     {
@@ -365,6 +365,7 @@ public:
     {
         d[ 0 ] = d[ 1 ] = d[ 2 ] = static_cast< T >( 0 );
         d[ 3 ] = rhs;
+        return *this;
     }
 
     void fill( const T& val )
@@ -557,7 +558,7 @@ public:
     {
         if ( i >= 4 )
         {
-            throw std::out_of_range( "quat<>: index out of range" );
+            //throw std::out_of_range( "quat<>: index out of range" );
         }
     }
 
@@ -616,7 +617,7 @@ public:
             }
             else
             {
-                throw ::std::runtime_error( "quat<>: no max on the matrix diagonal" );
+                //throw ::std::runtime_error( "quat<>: no max on the matrix diagonal" );
             }
 
         }
